@@ -4,8 +4,7 @@ import {
   getUserProfile,
   updateUserProfile,
   updateProfilePicture,
-  createUser,
-  checkUsername
+  createUser
 } from '../controllers/userController';
 import { setupUserProfile } from '../controllers/profileController';
 import upload from '../middleware/uploadMiddleware';
@@ -15,7 +14,6 @@ const router = express.Router();
 // Public routes
 router.post('/', createUser);
 router.post('/setup', setupUserProfile);
-router.get('/check-username/:username', checkUsername);
 
 // Protected routes
 router.get('/:id', protect, getUserProfile);

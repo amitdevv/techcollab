@@ -8,38 +8,49 @@ import authRoutes from './routes/authRoutes';
 import gigRoutes from './routes/gigRoutes';
 import eventRoutes from './routes/eventRoutes';
 import chatRoutes from './routes/chatRoutes';
+import cloudinaryRoutes from './routes/cloudinaryRoutes';
 import { initializeSocket } from './utils/socketHandler';
 
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
+export const createApp = () => {
+  const app = express();
 
-const app = express();
+  // Middleware
+  app.use(cors());
+  app.use(express.json());
+
+  // Routes
+  app.use('/api/users', userRoutes);
+  app.use('/api/auth', authRoutes);
+  app.use('/api/gigs', gigRoutes);
+  app.use('/api/events', eventRoutes);
+  app.use('/api/chat', chatRoutes);
+  app.use('/api/upload', cloudinaryRoutes);
+
+  // Health check route
+  app.get('/health', (req, res) => {
+    res.json({ status: 'OK' });
+  });
+
+  return app;
+}
+
+// Create the main app
+const app = createApp();
 const server = createServer(app);
 
 // Initialize Socket.IO
 const io = initializeSocket(server);
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Only connect to DB and start server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`WebSocket server initialized`);
+  });
+}
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/gigs', gigRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/chat', chatRoutes);
-
-// Health check route
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK' });
-});
-
-const PORT = process.env.PORT || 5000;
-
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`WebSocket server initialized`);
-});
+export { app };

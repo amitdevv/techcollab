@@ -138,7 +138,7 @@ export const initializeSocket = (server: HttpServer) => {
       next(new Error('Authentication error'));
     }
   });
-
+  // Remove duplicate connection handler - we only need one connection handler
   io.on('connection', (socket: AuthenticatedSocket) => {
     console.log('User connected:', socket.userId);
 
@@ -147,7 +147,7 @@ export const initializeSocket = (server: HttpServer) => {
       handleUserConnection(socket);
     }
 
-    // Handle messages
+    // Handle messages (legacy handler)
     socket.on('send_message', (data: { receiver: string, content: string }) => {
       if (socket.userId) {
         handleNewMessage(socket, data);
@@ -161,9 +161,6 @@ export const initializeSocket = (server: HttpServer) => {
         handleUserDisconnection(socket);
       }
     });
-  });
-
-  io.on('connection', (socket: AuthenticatedSocket) => {
     const authSocket = socket as AuthenticatedSocket;
     console.log(`User ${authSocket.user?.name} connected with socket ID: ${socket.id}`);
 
@@ -193,11 +190,10 @@ export const initializeSocket = (server: HttpServer) => {
       } catch (error) {
         console.error('Error joining channels:', error);
       }
-    });
-
-    // Handle joining a specific channel
+    });    // Handle joining a specific channel
     socket.on('join-channel', async (channelId: string) => {
       try {
+        console.log(`User ${authSocket.user?.name} is joining channel: ${channelId}`);
         const channel = await Channel.findById(channelId);
         if (!channel) {
           socket.emit('error', { message: 'Channel not found' });
@@ -210,8 +206,29 @@ export const initializeSocket = (server: HttpServer) => {
           return;
         }
 
-        socket.join(`channel:${channelId}`);
-        socket.emit('channel-joined', { channelId });
+        // Ensure the socket is removed from any previous channel room
+        const rooms = Array.from(socket.rooms);
+        rooms.forEach(room => {
+          if (room !== socket.id && room.startsWith('channel:')) {
+            socket.leave(room);
+          }
+        });
+
+        // Join the new channel room
+        const roomName = `channel:${channelId}`;
+        socket.join(roomName);
+        console.log(`User ${authSocket.user?.name} joined room: ${roomName}`);
+        socket.emit('channel-joined', { channelId, success: true });
+
+        // Get any recent messages that might have been missed
+        const recentMessages = await Message.find({ channel: channelId })
+          .sort({ createdAt: -1 })
+          .limit(50)
+          .populate('sender', 'name email profilePicture status')
+          .populate('mentions', 'name email profilePicture')
+          .lean();
+
+        socket.emit('channel-messages', recentMessages.reverse());
       } catch (error) {
         console.error('Error joining channel:', error);
         socket.emit('error', { message: 'Failed to join channel' });
@@ -222,17 +239,27 @@ export const initializeSocket = (server: HttpServer) => {
     socket.on('leave-channel', (channelId: string) => {
       socket.leave(`channel:${channelId}`);
       socket.emit('channel-left', { channelId });
-    });
-
-    // Handle sending messages
+    });    // Handle sending messages
     socket.on('send-message', async (data: {
       channelId: string;
       content: string;
       type?: string;
-      attachments?: any[];
+      attachments?: Array<{
+        type: 'image';
+        url: string;
+        name: string;
+        size?: number;
+      }>;
     }) => {
       try {
+        console.log(`Message received from ${authSocket.user?.name}:`, data);
         const { channelId, content, type = 'text', attachments = [] } = data;
+
+        // Validate message content
+        if (!content.trim() && (!attachments || attachments.length === 0)) {
+          socket.emit('error', { message: 'Message cannot be empty' });
+          return;
+        }
 
         // Validate channel access
         const channel = await Channel.findById(channelId);
@@ -246,13 +273,31 @@ export const initializeSocket = (server: HttpServer) => {
           return;
         }
 
+        // Ensure socket is in the channel room
+        const roomName = `channel:${channelId}`;
+        const rooms = Array.from(socket.rooms);
+        const isInRoom = rooms.includes(roomName);
+        if (!isInRoom) {
+          socket.join(roomName);
+          console.log(`User ${authSocket.user?.name} joining room ${roomName} for message`);
+        }
+
+        // Convert attachment data to match the Message schema
+        const formattedAttachments = attachments.map(att => ({
+          type: att.type,
+          url: att.url,
+          filename: att.name,
+          size: att.size || 0,
+          mimeType: att.type === 'image' ? 'image/jpeg' : 'application/octet-stream'
+        }));
+
         // Create message
         const messageData = {
           content,
           sender: new mongoose.Types.ObjectId(authSocket.userId!),
           channel: new mongoose.Types.ObjectId(channelId),
           type,
-          attachments
+          attachments: formattedAttachments
         };
 
         const message = new Message(messageData);
@@ -270,15 +315,20 @@ export const initializeSocket = (server: HttpServer) => {
           .populate('mentions', 'name email profilePicture')
           .lean();
 
+        console.log(`Broadcasting message to room ${roomName}`);
+
         // Broadcast to all users in the channel
-        io.to(`channel:${channelId}`).emit('new-message', populatedMessage);
+        io.to(roomName).emit('new-message', populatedMessage);
 
         // Update channel's last activity for all members
-        io.to(`channel:${channelId}`).emit('channel-updated', {
+        io.to(roomName).emit('channel-updated', {
           channelId,
           lastActivity: new Date(),
           messageCount: channel.messageCount + 1
         });
+
+        // Send confirmation to the sender
+        socket.emit('message-sent', { success: true, messageId: message._id });
 
       } catch (error) {
         console.error('Error sending message:', error);

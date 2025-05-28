@@ -21,9 +21,11 @@ export interface IEvent extends Document {
   attendees: mongoose.Types.ObjectId[];
   maxAttendees?: number;
   price: number;
-  currency: string;
-  tags: string[];
-  images: string[];
+  currency: string; tags: string[];
+  images: Array<{
+    url: string;
+    publicId: string;
+  }>;
   status: 'draft' | 'published' | 'cancelled' | 'completed';
   featured: boolean;
   requirements?: string[];
@@ -109,9 +111,9 @@ const eventSchema = new Schema<IEvent>({
     type: String,
     trim: true,
     lowercase: true
-  }],
-  images: [{
-    type: String
+  }], images: [{
+    url: { type: String, required: true },
+    publicId: { type: String, required: true }
   }],
   status: {
     type: String,

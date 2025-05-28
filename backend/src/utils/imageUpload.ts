@@ -46,4 +46,4 @@ export const deleteImage = async (publicId: string): Promise<void> => {
     console.error('Image deletion error:', error);
     throw new Error('Failed to delete image');
   }
-}; 
+};

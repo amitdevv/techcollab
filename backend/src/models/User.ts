@@ -4,12 +4,10 @@ export interface IUser extends Document {
   _id: string;
   name: string;
   email: string;
-  username?: string;
-  password?: string;
   bio?: string;
   picture?: string;
   picturePublicId?: string;
-  authProvider: 'google' | 'github' | 'password';
+  authProvider: 'google' | 'email';
   providerId?: string;
   emailVerified: boolean;
   profile: {
@@ -35,12 +33,10 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  username: { type: String, unique: true, sparse: true },
-  password: { type: String },
   bio: String,
   picture: String,
   picturePublicId: String,
-  authProvider: { type: String, enum: ['google', 'github', 'password'], required: true },
+  authProvider: { type: String, enum: ['google', 'email'], required: true },
   providerId: String,
   emailVerified: { type: Boolean, default: false },
   profile: {

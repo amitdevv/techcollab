@@ -1,30 +1,10 @@
 import { Request, Response } from 'express';
 import { User } from '../models/User';
 import { generateToken } from '../utils/generateToken';
-import { uploadImage } from '../utils/imageUpload';
+import { uploadImage, deleteImage } from '../utils/imageUpload';
 import { AuthRequest } from '../types/auth';
 
-// Check if username exists
-export const checkUsername = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { username } = req.params;
-
-    if (!username) {
-      res.status(400).json({ message: 'Username parameter is required' });
-      return;
-    }
-
-    const user = await User.findOne({ username });
-
-    res.json({
-      exists: !!user,
-      available: !user
-    });
-  } catch (error) {
-    console.error('Error checking username:', error);
-    res.status(500).json({ message: 'Error checking username availability' });
-  }
-};
+// Username function removed
 
 // Get user profile
 export const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -45,9 +25,15 @@ export const getUserProfile = async (req: AuthRequest, res: Response): Promise<v
 export const updateUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     console.log('Updating profile for user:', req.params.id);
-    console.log('Request body:', req.body);
+    console.log('Request body:', req.body); const updateFields: any = {};
 
-    const updateFields: any = {};
+    // Preserve picture fields if provided
+    if (req.body.picture !== undefined) {
+      updateFields.picture = req.body.picture;
+    }
+    if (req.body.picturePublicId !== undefined) {
+      updateFields.picturePublicId = req.body.picturePublicId;
+    }
 
     // Update both top-level bio and nested profile.bio for consistency
     if (req.body.bio !== undefined) {
@@ -106,9 +92,7 @@ export const updateProfilePicture = async (req: AuthRequest, res: Response): Pro
     }
 
     let pictureUrl;
-    let publicId;
-
-    if (req.file) {
+    let publicId; if (req.file) {
       // If a file was uploaded, process it through Cloudinary
       const result = await uploadImage(req.file, 'profile-pictures');
       pictureUrl = result.url;
@@ -120,6 +104,13 @@ export const updateProfilePicture = async (req: AuthRequest, res: Response): Pro
     } else {
       res.status(400).json({ message: 'No image file or URL provided' });
       return;
+    }    // Delete old profile picture if it exists
+    if (user.picturePublicId) {
+      try {
+        await deleteImage(user.picturePublicId);
+      } catch (error) {
+        console.error('Error deleting old profile picture:', error);
+      }
     }
 
     // Update user with new picture URL and public ID
@@ -127,7 +118,7 @@ export const updateProfilePicture = async (req: AuthRequest, res: Response): Pro
       req.params.id,
       {
         picture: pictureUrl,
-        ...(publicId && { picturePublicId: publicId })
+        picturePublicId: publicId // Always update both fields together
       },
       { new: true }
     );
