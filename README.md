@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![TechCollab Banner](https://via.placeholder.com/800x200/219653/FFFFFF?text=TechCollab+-+Where+Tech+Talent+Meets+Opportunity)
+![TechCollab Banner](https://res.cloudinary.com/dtmo3evjx/image/upload/v1748529997/techcollab_oppeyf.png)
 
 [![React](https://img.shields.io/badge/React-18.0+-blue.svg)](https://reactjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org)
