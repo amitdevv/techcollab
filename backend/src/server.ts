@@ -64,7 +64,7 @@ const server = createServer(app);
 const io = initializeSocket(server);
 
 // Define PORT constant for Render deployment
-const PORT = process.env.PORT || 5000;
+const PORT = parseInt(process.env.PORT || '5000');
 
 // Only connect to DB and start server if not in test mode
 if (process.env.NODE_ENV !== 'test') {
