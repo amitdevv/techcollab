@@ -154,6 +154,11 @@ export const getEventById = async (req: AuthRequest, res: Response): Promise<voi
 // Create new event
 export const createEvent = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    console.log('Create event request received:', {
+      userId: req.user?.id,
+      body: JSON.stringify(req.body, null, 2)
+    });
+
     if (!req.user) {
       res.status(401).json({
         success: false,
@@ -167,11 +172,15 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
       organizer: new mongoose.Types.ObjectId(req.user.id)
     };
 
+    console.log('Event data prepared for creation:', JSON.stringify(eventData, null, 2));
+
     const event = new Event(eventData);
     await event.save();
 
     const populatedEvent = await Event.findById(event._id)
       .populate('organizer', 'name email profilePicture verified');
+
+    console.log('Event created successfully:', populatedEvent?._id);
 
     res.status(201).json({
       success: true,
@@ -180,12 +189,29 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
     });
   } catch (error) {
     console.error('Create event error:', error);
+    console.error('Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    });
+
     if (error instanceof Error && error.name === 'ValidationError') {
       const validationError = error as any; // Cast to access mongoose validation errors
+      console.error('Validation errors:', validationError.errors);
+      
+      const errorDetails = Object.values(validationError.errors).map((err: any) => ({
+        field: err.path,
+        message: err.message,
+        value: err.value
+      }));
+      
+      console.error('Detailed validation errors:', errorDetails);
+      
       res.status(400).json({
         success: false,
         message: 'Validation error',
-        errors: Object.values(validationError.errors).map((err: any) => err.message)
+        errors: Object.values(validationError.errors).map((err: any) => err.message),
+        details: errorDetails
       });
       return;
     }
@@ -539,49 +565,53 @@ export const getEventAnalytics = async (req: AuthRequest, res: Response): Promis
       return;
     }
 
-    const userId = new mongoose.Types.ObjectId(req.user.id);
-    const totalEvents = await Event.countDocuments({ organizer: userId });
-    const publishedEvents = await Event.countDocuments({
-      organizer: userId,
-      status: 'published'
-    });
-    const completedEvents = await Event.countDocuments({
-      organizer: userId,
-      status: 'completed'
-    });    // Get total registrations across all events
-    const eventsWithAttendees = await Event.find({ organizer: userId })
-      .select('attendees title date');
+    const organizerId = new mongoose.Types.ObjectId(req.user.id);
 
-    const totalRegistrations = eventsWithAttendees.reduce(
-      (sum, event) => sum + event.attendees.length,
-      0
-    );
+    // Get analytics
+    const analytics = await Event.aggregate([
+      { $match: { organizer: organizerId } },
+      {
+        $group: {
+          _id: null,
+          totalEvents: { $sum: 1 },
+          publishedEvents: { $sum: { $cond: [{ $eq: ['$status', 'published'] }, 1, 0] } },
+          draftEvents: { $sum: { $cond: [{ $eq: ['$status', 'draft'] }, 1, 0] } },
+          totalAttendees: { $sum: '$attendeeCount' },
+          avgAttendeesPerEvent: { $avg: '$attendeeCount' },
+          totalRevenue: { $sum: { $multiply: ['$attendeeCount', '$price'] } }
+        }
+      }
+    ]);
 
     // Get upcoming events
     const upcomingEvents = await Event.countDocuments({
-      organizer: userId,
-      status: 'published',
-      date: { $gte: new Date() }
+      organizer: organizerId,
+      date: { $gte: new Date() },
+      status: 'published'
     });
 
-    // Get recent events with attendee counts
-    const recentEvents = await Event.find({ organizer: userId })
-      .populate('organizer', 'name email')
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select('title date attendees status category');
+    // Get past events
+    const pastEvents = await Event.countDocuments({
+      organizer: organizerId,
+      date: { $lt: new Date() },
+      status: 'published'
+    });
+
+    const result = analytics[0] || {
+      totalEvents: 0,
+      publishedEvents: 0,
+      draftEvents: 0,
+      totalAttendees: 0,
+      avgAttendeesPerEvent: 0,
+      totalRevenue: 0
+    };
 
     res.json({
       success: true,
       data: {
-        overview: {
-          totalEvents,
-          publishedEvents,
-          completedEvents,
-          upcomingEvents,
-          totalRegistrations
-        },
-        recentEvents
+        ...result,
+        upcomingEvents,
+        pastEvents
       }
     });
   } catch (error) {
@@ -590,5 +620,28 @@ export const getEventAnalytics = async (req: AuthRequest, res: Response): Promis
       success: false,
       message: 'Failed to fetch event analytics'
     });
+  }
+};
+
+// Get upcoming events for dashboard
+export const getUpcomingEvents = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 6;
+    const now = new Date();
+
+    const upcomingEvents = await Event.find({
+      status: 'published',
+      date: { $gte: now }
+    })
+      .populate('organizer', 'name picture status')
+      .populate('attendees', 'name picture')
+      .sort({ date: 1, attendeeCount: -1 }) // Sort by date first, then by popularity
+      .limit(limit)
+      .lean();
+
+    res.json(upcomingEvents);
+  } catch (error) {
+    console.error('Error in getUpcomingEvents:', error);
+    res.status(500).json({ message: 'Error fetching upcoming events' });
   }
 };

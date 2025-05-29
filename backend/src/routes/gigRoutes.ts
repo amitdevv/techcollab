@@ -8,13 +8,15 @@ import {
   deleteGig,
   getUserGigs,
   saveGigDraft,
-  getGigAnalytics
+  getGigAnalytics,
+  getTrendingGigs
 } from '../controllers/gigController';
 
 const router = express.Router();
 
 // Public routes
 router.get('/', getGigs);
+router.get('/trending', getTrendingGigs);
 router.get('/:id', getGigById);
 
 // Protected routes

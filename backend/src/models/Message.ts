@@ -3,28 +3,40 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IMessage extends Document {
   _id: string;
   content: string;
+  type: 'text' | 'image' | 'file' | 'announcement';
   sender: mongoose.Types.ObjectId;
-  channel: mongoose.Types.ObjectId;
-  parentMessage?: mongoose.Types.ObjectId; // For replies/threads
-  type: 'text' | 'image' | 'file' | 'system';
-  read: boolean; // Whether the message has been read
-  readBy: mongoose.Types.ObjectId[]; // Array of users who have read the message
-  attachments: {
+  channel?: mongoose.Types.ObjectId;
+  chat?: mongoose.Types.ObjectId;
+  attachments: Array<{
     type: 'image' | 'file';
     url: string;
     filename: string;
-    size: number;
-    mimeType: string;
-  }[];
-  reactions: {
+    size?: number;
+    publicId?: string; // For Cloudinary cleanup
+    thumbnailUrl?: string; // For image previews
+    width?: number;
+    height?: number;
+  }>;
+  mentions: mongoose.Types.ObjectId[];
+  reactions: Array<{
     emoji: string;
     users: mongoose.Types.ObjectId[];
-  }[];
-  mentions: mongoose.Types.ObjectId[];
+  }>;
   isEdited: boolean;
   editedAt?: Date;
   isDeleted: boolean;
   deletedAt?: Date;
+  parentMessage?: mongoose.Types.ObjectId; // For thread/reply functionality
+  readBy: Array<{
+    user: mongoose.Types.ObjectId;
+    readAt: Date;
+  }>;
+  // For announcements
+  announcement?: {
+    title: string;
+    isPinned: boolean;
+    priority: 'low' | 'normal' | 'high' | 'urgent';
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,7 +45,12 @@ const messageSchema = new Schema<IMessage>({
   content: {
     type: String,
     required: true,
-    maxlength: 4000
+    maxlength: 2000
+  },
+  type: {
+    type: String,
+    enum: ['text', 'image', 'file', 'announcement'],
+    default: 'text'
   },
   sender: {
     type: Schema.Types.ObjectId,
@@ -42,25 +59,11 @@ const messageSchema = new Schema<IMessage>({
   },
   channel: {
     type: Schema.Types.ObjectId,
-    ref: 'Channel',
-    required: true
+    ref: 'Channel'
   },
-  parentMessage: {
+  chat: {
     type: Schema.Types.ObjectId,
-    ref: 'Message'
-  },
-  read: {
-    type: Boolean,
-    default: false
-  },
-  readBy: [{
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  type: {
-    type: String,
-    enum: ['text', 'image', 'file', 'system'],
-    default: 'text'
+    ref: 'Chat'
   },
   attachments: [{
     type: {
@@ -77,13 +80,24 @@ const messageSchema = new Schema<IMessage>({
       required: true
     },
     size: {
-      type: Number,
-      required: true
+      type: Number
     },
-    mimeType: {
-      type: String,
-      required: true
+    publicId: {
+      type: String // For Cloudinary cleanup
+    },
+    thumbnailUrl: {
+      type: String // For image previews
+    },
+    width: {
+      type: Number
+    },
+    height: {
+      type: Number
     }
+  }],
+  mentions: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   }],
   reactions: [{
     emoji: {
@@ -94,10 +108,6 @@ const messageSchema = new Schema<IMessage>({
       type: Schema.Types.ObjectId,
       ref: 'User'
     }]
-  }],
-  mentions: [{
-    type: Schema.Types.ObjectId,
-    ref: 'User'
   }],
   isEdited: {
     type: Boolean,
@@ -112,6 +122,36 @@ const messageSchema = new Schema<IMessage>({
   },
   deletedAt: {
     type: Date
+  },
+  parentMessage: {
+    type: Schema.Types.ObjectId,
+    ref: 'Message'
+  },
+  readBy: [{
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    readAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  announcement: {
+    title: {
+      type: String,
+      maxlength: 100
+    },
+    isPinned: {
+      type: Boolean,
+      default: false
+    },
+    priority: {
+      type: String,
+      enum: ['low', 'normal', 'high', 'urgent'],
+      default: 'normal'
+    }
   }
 }, {
   timestamps: true
@@ -119,22 +159,20 @@ const messageSchema = new Schema<IMessage>({
 
 // Indexes for better query performance
 messageSchema.index({ channel: 1, createdAt: -1 });
-messageSchema.index({ sender: 1 });
-messageSchema.index({ parentMessage: 1 });
-messageSchema.index({ mentions: 1 });
-messageSchema.index({ 'reactions.users': 1 });
+messageSchema.index({ chat: 1, createdAt: -1 });
+messageSchema.index({ sender: 1, createdAt: -1 });
+messageSchema.index({ isDeleted: 1 });
+messageSchema.index({ type: 1 });
+messageSchema.index({ 'readBy.user': 1 });
+messageSchema.index({ 'announcement.isPinned': 1 });
 
-// Virtual for reaction counts
-messageSchema.virtual('reactionCounts').get(function () {
-  const counts: { [key: string]: number } = {};
-  this.reactions?.forEach(reaction => {
-    counts[reaction.emoji] = reaction.users?.length || 0;
-  });
-  return counts;
+// Ensure either channel or chat is provided
+messageSchema.pre('save', function(next) {
+  if (!this.channel && !this.chat) {
+    next(new Error('Message must belong to either a channel or a chat'));
+  } else {
+    next();
+  }
 });
-
-// Ensure virtuals are included in JSON
-messageSchema.set('toJSON', { virtuals: true });
-messageSchema.set('toObject', { virtuals: true });
 
 export const Message = mongoose.model<IMessage>('Message', messageSchema);

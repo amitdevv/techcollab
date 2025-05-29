@@ -9,6 +9,10 @@ import gigRoutes from './routes/gigRoutes';
 import eventRoutes from './routes/eventRoutes';
 import chatRoutes from './routes/chatRoutes';
 import cloudinaryRoutes from './routes/cloudinaryRoutes';
+import draftRoutes from './routes/draftRoutes';
+import notificationRoutes from './routes/notificationRoutes';
+import proposalRoutes from './routes/proposalRoutes';
+import aiRoutes from './routes/aiRoutes';
 import { initializeSocket } from './utils/socketHandler';
 
 dotenv.config();
@@ -27,6 +31,10 @@ export const createApp = () => {
   app.use('/api/events', eventRoutes);
   app.use('/api/chat', chatRoutes);
   app.use('/api/upload', cloudinaryRoutes);
+  app.use('/api/drafts', draftRoutes);
+  app.use('/api/notifications', notificationRoutes);
+  app.use('/api/proposals', proposalRoutes);
+  app.use('/api/ai', aiRoutes);
 
   // Health check route
   app.get('/health', (req, res) => {

@@ -10,6 +10,8 @@ export interface IUser extends Document {
   authProvider: 'google' | 'email';
   providerId?: string;
   emailVerified: boolean;
+  role?: string;
+  phone?: string;
   profile: {
     bio?: string;
     location?: string;
@@ -23,6 +25,23 @@ export interface IUser extends Document {
     activeGigs: number;
     events: number;
     messages: number;
+  };
+  preferences: {
+    notifications: {
+      email: boolean;
+      push: boolean;
+      marketplaceAlerts: boolean;
+      messageNotifications: boolean;
+      eventReminders: boolean;
+    };
+    privacy: {
+      profileVisibility: 'public' | 'private';
+      showEmail: boolean;
+      showPhone: boolean;
+      searchable: boolean;
+    };
+    language: string;
+    timezone: string;
   };
   status?: 'online' | 'offline' | 'away' | 'busy';
   lastSeen?: Date;
@@ -39,6 +58,8 @@ const userSchema = new Schema<IUser>({
   authProvider: { type: String, enum: ['google', 'email'], required: true },
   providerId: String,
   emailVerified: { type: Boolean, default: false },
+  role: { type: String, default: 'Premium' },
+  phone: String,
   profile: {
     bio: String,
     location: String,
@@ -52,6 +73,23 @@ const userSchema = new Schema<IUser>({
     activeGigs: { type: Number, default: 0 },
     events: { type: Number, default: 0 },
     messages: { type: Number, default: 0 }
+  },
+  preferences: {
+    notifications: {
+      email: { type: Boolean, default: true },
+      push: { type: Boolean, default: true },
+      marketplaceAlerts: { type: Boolean, default: true },
+      messageNotifications: { type: Boolean, default: true },
+      eventReminders: { type: Boolean, default: true }
+    },
+    privacy: {
+      profileVisibility: { type: String, enum: ['public', 'private'], default: 'public' },
+      showEmail: { type: Boolean, default: false },
+      showPhone: { type: Boolean, default: false },
+      searchable: { type: Boolean, default: true }
+    },
+    language: { type: String, default: 'en' },
+    timezone: { type: String, default: 'UTC' }
   },
   status: {
     type: String,

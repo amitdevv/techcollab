@@ -8,7 +8,8 @@ export interface IGig extends Document {
   subCategory: 'frontend' | 'backend' | 'fullstack' | 'wordpress' | 'ecommerce' | 'ios' | 'android' | 'ui' | 'ux' | 'graphic' | 'logo' | 'analysis' | 'ml' | 'visualization' | 'cicd' | 'cloud' | 'infrastructure' | 'copywriting' | 'technical' | 'content' | 'seo' | 'social' | 'ads';
   price: number;
   deliveryTime: '1' | '3' | '7' | '14' | '30';
-  tags: string[]; images: Array<{
+  tags: string[];
+  images?: Array<{
     url: string;
     publicId: string;
   }>;
@@ -43,10 +44,13 @@ const gigSchema = new Schema<IGig>({
     enum: ['1', '3', '7', '14', '30']
   },
   tags: [{ type: String, maxlength: 5 }],
-  images: [{
-    url: { type: String, required: true },
-    publicId: { type: String, required: true }
-  }],
+  images: {
+    type: [{
+      url: { type: String, required: true },
+      publicId: { type: String, required: true }
+    }],
+    default: []
+  },
   freelancer: {
     type: Schema.Types.ObjectId,
     ref: 'User',

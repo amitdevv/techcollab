@@ -3,6 +3,7 @@ import { User } from '../models/User';
 import { generateToken } from '../utils/generateToken';
 import { uploadImage, deleteImage } from '../utils/imageUpload';
 import { AuthRequest } from '../types/auth';
+import { uploadProfileImage } from '../utils/imageUpload';
 
 // Username function removed
 
@@ -25,7 +26,9 @@ export const getUserProfile = async (req: AuthRequest, res: Response): Promise<v
 export const updateUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     console.log('Updating profile for user:', req.params.id);
-    console.log('Request body:', req.body); const updateFields: any = {};
+    console.log('Request body:', req.body);
+
+    const updateFields: any = {};
 
     // Preserve picture fields if provided
     if (req.body.picture !== undefined) {
@@ -33,6 +36,17 @@ export const updateUserProfile = async (req: AuthRequest, res: Response): Promis
     }
     if (req.body.picturePublicId !== undefined) {
       updateFields.picturePublicId = req.body.picturePublicId;
+    }
+
+    // Update basic profile fields
+    if (req.body.name !== undefined) {
+      updateFields.name = req.body.name;
+    }
+    if (req.body.phone !== undefined) {
+      updateFields.phone = req.body.phone;
+    }
+    if (req.body.role !== undefined) {
+      updateFields.role = req.body.role;
     }
 
     // Update both top-level bio and nested profile.bio for consistency
@@ -59,6 +73,27 @@ export const updateUserProfile = async (req: AuthRequest, res: Response): Promis
     }
     if (req.body.skills !== undefined) {
       updateFields['profile.skills'] = req.body.skills;
+    }
+
+    // Update preferences
+    if (req.body.preferences !== undefined) {
+      // Handle nested preferences updates
+      if (req.body.preferences.notifications !== undefined) {
+        Object.keys(req.body.preferences.notifications).forEach(key => {
+          updateFields[`preferences.notifications.${key}`] = req.body.preferences.notifications[key];
+        });
+      }
+      if (req.body.preferences.privacy !== undefined) {
+        Object.keys(req.body.preferences.privacy).forEach(key => {
+          updateFields[`preferences.privacy.${key}`] = req.body.preferences.privacy[key];
+        });
+      }
+      if (req.body.preferences.language !== undefined) {
+        updateFields['preferences.language'] = req.body.preferences.language;
+      }
+      if (req.body.preferences.timezone !== undefined) {
+        updateFields['preferences.timezone'] = req.body.preferences.timezone;
+      }
     }
 
     console.log('Update fields:', updateFields);
@@ -92,24 +127,36 @@ export const updateProfilePicture = async (req: AuthRequest, res: Response): Pro
     }
 
     let pictureUrl;
-    let publicId; if (req.file) {
-      // If a file was uploaded, process it through Cloudinary
-      const result = await uploadImage(req.file, 'profile-pictures');
-      pictureUrl = result.url;
+    let publicId;
+
+    if (req.file) {
+      // If a file was uploaded, process it through Cloudinary with profile optimization
+      const result = await uploadProfileImage(req.file);
+      pictureUrl = result.secure_url;
       publicId = result.public_id;
+      
+      console.log('Profile picture uploaded:', { 
+        userId: req.params.id, 
+        publicId, 
+        url: pictureUrl 
+      });
     } else if (req.body.picture) {
       // If a Cloudinary URL was provided directly
       pictureUrl = req.body.picture;
-      publicId = req.body.publicId || null;
+      publicId = req.body.picturePublicId || req.body.publicId || null;
     } else {
       res.status(400).json({ message: 'No image file or URL provided' });
       return;
-    }    // Delete old profile picture if it exists
-    if (user.picturePublicId) {
+    }
+
+    // Delete old profile picture if it exists
+    if (user.picturePublicId && user.picturePublicId !== publicId) {
       try {
+        console.log('Deleting old profile picture:', user.picturePublicId);
         await deleteImage(user.picturePublicId);
       } catch (error) {
         console.error('Error deleting old profile picture:', error);
+        // Don't fail the update if old image deletion fails
       }
     }
 
@@ -118,7 +165,7 @@ export const updateProfilePicture = async (req: AuthRequest, res: Response): Pro
       req.params.id,
       {
         picture: pictureUrl,
-        picturePublicId: publicId // Always update both fields together
+        picturePublicId: publicId
       },
       { new: true }
     );
@@ -128,10 +175,28 @@ export const updateProfilePicture = async (req: AuthRequest, res: Response): Pro
       return;
     }
 
-    res.json(updatedUser);
-  } catch (error) {
+    console.log('Profile picture updated successfully for user:', req.params.id);
+
+    res.json({
+      success: true,
+      picture: updatedUser.picture,
+      picturePublicId: updatedUser.picturePublicId,
+      message: 'Profile picture updated successfully'
+    });
+  } catch (error: any) {
     console.error('Error updating profile picture:', error);
-    res.status(500).json({ message: 'Error updating profile picture' });
+    
+    // Return appropriate error status
+    let statusCode = 500;
+    if (error.message.includes('Invalid file type')) statusCode = 400;
+    if (error.message.includes('File size too large')) statusCode = 413;
+    if (error.message.includes('authentication failed')) statusCode = 401;
+    
+    res.status(statusCode).json({ 
+      success: false,
+      message: error.message || 'Error updating profile picture',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 

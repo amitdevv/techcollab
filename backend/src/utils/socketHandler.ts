@@ -19,89 +19,6 @@ interface AuthenticatedSocket extends Socket {
 // Store connected users
 const connectedUsers = new Map<string, string>(); // userId -> socketId
 
-// Handle user connection
-const handleUserConnection = async (socket: AuthenticatedSocket) => {
-  try {
-    if (!socket.userId) return;
-
-    // Store user's socket connection
-    connectedUsers.set(socket.userId, socket.id);
-
-    // Update user status to online
-    await User.findByIdAndUpdate(socket.userId, {
-      status: 'online',
-      lastSeen: new Date()
-    });
-
-    // Notify other users about status change
-    socket.broadcast.emit('user_status_change', {
-      userId: socket.userId,
-      status: 'online'
-    });
-  } catch (error) {
-    console.error('Error in handleUserConnection:', error);
-  }
-};
-
-// Handle user disconnection
-const handleUserDisconnection = async (socket: AuthenticatedSocket) => {
-  try {
-    if (!socket.userId) return;
-
-    // Remove user from connected users
-    connectedUsers.delete(socket.userId);
-
-    // Update user status to offline
-    await User.findByIdAndUpdate(socket.userId, {
-      status: 'offline',
-      lastSeen: new Date()
-    });
-
-    // Notify other users about status change
-    socket.broadcast.emit('user_status_change', {
-      userId: socket.userId,
-      status: 'offline'
-    });
-  } catch (error) {
-    console.error('Error in handleUserDisconnection:', error);
-  }
-};
-
-// Handle new message
-const handleNewMessage = async (socket: AuthenticatedSocket, messageData: any) => {
-  try {
-    if (!socket.userId) return;
-
-    const { receiver, content } = messageData;
-
-    // Create new message
-    const newMessage = await Message.create({
-      sender: socket.userId,
-      receiver,
-      content,
-      read: false
-    });
-
-    // Populate message with sender and receiver details
-    const populatedMessage = await Message.findById(newMessage._id)
-      .populate('sender', 'name username picture')
-      .populate('receiver', 'name username picture')
-      .lean();
-
-    // Send message to receiver if online
-    const receiverSocketId = connectedUsers.get(receiver);
-    if (receiverSocketId) {
-      socket.to(receiverSocketId).emit('receive_message', populatedMessage);
-    }
-
-    // Acknowledge message receipt
-    socket.emit('message_sent', populatedMessage);
-  } catch (error) {
-    console.error('Error in handleNewMessage:', error);
-    socket.emit('message_error', { message: 'Failed to send message' });
-  }
-};
-
 export const initializeSocket = (server: HttpServer) => {
   const io = new Server(server, {
     cors: {
@@ -110,19 +27,23 @@ export const initializeSocket = (server: HttpServer) => {
       credentials: true
     }
   });
+
   // Authentication middleware for socket connections
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {
       const token = socket.handshake.auth.token;
+      console.log('Socket authentication attempt with token:', token ? 'present' : 'missing');
 
       if (!token) {
+        console.error('No token provided for socket authentication');
         return next(new Error('Authentication error'));
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      const user = await User.findById(decoded.id).select('name email picture status');
+      const user = await User.findById(decoded.id).select('name email profilePicture status');
 
       if (!user) {
+        console.error('User not found for token:', decoded.id);
         return next(new Error('User not found'));
       }
 
@@ -133,67 +54,94 @@ export const initializeSocket = (server: HttpServer) => {
         email: user.email,
         status: user.status || 'online'
       };
+
+      console.log('Socket authentication successful for user:', user.name);
       next();
     } catch (error) {
+      console.error('Socket authentication error:', error);
       next(new Error('Authentication error'));
     }
   });
-  // Remove duplicate connection handler - we only need one connection handler
-  io.on('connection', (socket: AuthenticatedSocket) => {
-    console.log('User connected:', socket.userId);
 
-    // Handle initial connection
+  // Single connection handler
+  io.on('connection', async (socket: AuthenticatedSocket) => {
+    console.log(`User ${socket.user?.name} (${socket.userId}) connected with socket ID: ${socket.id}`);
+
+    // Store user's socket connection
     if (socket.userId) {
-      handleUserConnection(socket);
+      connectedUsers.set(socket.userId, socket.id);
+
+      // Update user status to online
+      try {
+        await User.findByIdAndUpdate(socket.userId, {
+          status: 'online',
+          lastSeen: new Date()
+        });
+
+        // Notify other users about status change
+        socket.broadcast.emit('user-status-updated', {
+          userId: socket.userId,
+          status: 'online'
+        });
+
+        // Join user's personal room
+        socket.join(`user:${socket.userId}`);
+
+        console.log(`User ${socket.user?.name} status updated to online`);
+      } catch (error) {
+        console.error('Error updating user status on connection:', error);
+      }
     }
 
-    // Handle messages (legacy handler)
-    socket.on('send_message', (data: { receiver: string, content: string }) => {
-      if (socket.userId) {
-        handleNewMessage(socket, data);
-      }
-    });
-
-    // Handle disconnection
-    socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.userId);
-      if (socket.userId) {
-        handleUserDisconnection(socket);
-      }
-    });
-    const authSocket = socket as AuthenticatedSocket;
-    console.log(`User ${authSocket.user?.name} connected with socket ID: ${socket.id}`);
-
-    // Join user to their channels
+    // Auto-join user to their channels
     socket.on('join-channels', async () => {
       try {
+        if (!socket.userId) {
+          console.error('No userId on socket when joining channels');
+          return;
+        }
+
         const channels = await Channel.find({
           $and: [
             { isArchived: false },
             {
               $or: [
                 { type: 'public' },
-                { type: 'private', members: new mongoose.Types.ObjectId(authSocket.userId!) }
+                { type: 'private', members: new mongoose.Types.ObjectId(socket.userId) }
               ]
             }
           ]
-        }).select('_id name');
+        }).select('_id name type');
+
+        console.log(`User ${socket.user?.name} joining ${channels.length} channels`);
 
         channels.forEach(channel => {
           socket.join(`channel:${channel._id}`);
+          console.log(`User ${socket.user?.name} joined channel: ${channel.name} (${channel._id})`);
         });
 
-        // Join user's personal room for notifications
-        socket.join(`user:${authSocket.userId}`);
+        socket.emit('channels-joined', {
+          count: channels.length,
+          channels: channels.map(c => ({ id: c._id, name: c.name, type: c.type }))
+        });
 
-        console.log(`User ${authSocket.user?.name} joined ${channels.length} channels`);
+        console.log(`User ${socket.user?.name} joined ${channels.length} channels successfully`);
       } catch (error) {
         console.error('Error joining channels:', error);
+        socket.emit('error', { message: 'Failed to join channels' });
       }
-    });    // Handle joining a specific channel
+    });
+
+    // Handle joining a specific channel
     socket.on('join-channel', async (channelId: string) => {
       try {
-        console.log(`User ${authSocket.user?.name} is joining channel: ${channelId}`);
+        if (!socket.userId) {
+          socket.emit('error', { message: 'User not authenticated' });
+          return;
+        }
+
+        console.log(`User ${socket.user?.name} attempting to join channel: ${channelId}`);
+
         const channel = await Channel.findById(channelId);
         if (!channel) {
           socket.emit('error', { message: 'Channel not found' });
@@ -201,34 +149,14 @@ export const initializeSocket = (server: HttpServer) => {
         }
 
         // Check if user has access
-        if (channel.type === 'private' && !channel.members.some(member => member.toString() === authSocket.userId)) {
+        if (channel.type === 'private' && !channel.members.some(member => member.toString() === socket.userId)) {
           socket.emit('error', { message: 'Access denied to private channel' });
           return;
         }
 
-        // Ensure the socket is removed from any previous channel room
-        const rooms = Array.from(socket.rooms);
-        rooms.forEach(room => {
-          if (room !== socket.id && room.startsWith('channel:')) {
-            socket.leave(room);
-          }
-        });
-
-        // Join the new channel room
-        const roomName = `channel:${channelId}`;
-        socket.join(roomName);
-        console.log(`User ${authSocket.user?.name} joined room: ${roomName}`);
-        socket.emit('channel-joined', { channelId, success: true });
-
-        // Get any recent messages that might have been missed
-        const recentMessages = await Message.find({ channel: channelId })
-          .sort({ createdAt: -1 })
-          .limit(50)
-          .populate('sender', 'name email profilePicture status')
-          .populate('mentions', 'name email profilePicture')
-          .lean();
-
-        socket.emit('channel-messages', recentMessages.reverse());
+        socket.join(`channel:${channelId}`);
+        socket.emit('channel-joined', { channelId, channelName: channel.name });
+        console.log(`User ${socket.user?.name} joined channel ${channel.name} (${channelId})`);
       } catch (error) {
         console.error('Error joining channel:', error);
         socket.emit('error', { message: 'Failed to join channel' });
@@ -239,25 +167,22 @@ export const initializeSocket = (server: HttpServer) => {
     socket.on('leave-channel', (channelId: string) => {
       socket.leave(`channel:${channelId}`);
       socket.emit('channel-left', { channelId });
-    });    // Handle sending messages
+      console.log(`User ${socket.user?.name} left channel ${channelId}`);
+    });
+
+    // Handle sending messages to channels
     socket.on('send-message', async (data: {
       channelId: string;
       content: string;
       type?: string;
-      attachments?: Array<{
-        type: 'image';
-        url: string;
-        name: string;
-        size?: number;
-      }>;
+      attachments?: any[];
     }) => {
       try {
-        console.log(`Message received from ${authSocket.user?.name}:`, data);
         const { channelId, content, type = 'text', attachments = [] } = data;
+        console.log(`User ${socket.user?.name} sending message to channel ${channelId}: "${content}"`);
 
-        // Validate message content
-        if (!content.trim() && (!attachments || attachments.length === 0)) {
-          socket.emit('error', { message: 'Message cannot be empty' });
+        if (!socket.userId) {
+          socket.emit('error', { message: 'User not authenticated' });
           return;
         }
 
@@ -268,36 +193,19 @@ export const initializeSocket = (server: HttpServer) => {
           return;
         }
 
-        if (channel.type === 'private' && !channel.members.some(member => member.toString() === authSocket.userId)) {
+        if (channel.type === 'private' && !channel.members.some(member => member.toString() === socket.userId)) {
           socket.emit('error', { message: 'Access denied to private channel' });
           return;
         }
 
-        // Ensure socket is in the channel room
-        const roomName = `channel:${channelId}`;
-        const rooms = Array.from(socket.rooms);
-        const isInRoom = rooms.includes(roomName);
-        if (!isInRoom) {
-          socket.join(roomName);
-          console.log(`User ${authSocket.user?.name} joining room ${roomName} for message`);
-        }
-
-        // Convert attachment data to match the Message schema
-        const formattedAttachments = attachments.map(att => ({
-          type: att.type,
-          url: att.url,
-          filename: att.name,
-          size: att.size || 0,
-          mimeType: att.type === 'image' ? 'image/jpeg' : 'application/octet-stream'
-        }));
-
         // Create message
         const messageData = {
           content,
-          sender: new mongoose.Types.ObjectId(authSocket.userId!),
+          sender: new mongoose.Types.ObjectId(socket.userId),
           channel: new mongoose.Types.ObjectId(channelId),
           type,
-          attachments: formattedAttachments
+          attachments,
+          timestamp: new Date()
         };
 
         const message = new Message(messageData);
@@ -315,24 +223,78 @@ export const initializeSocket = (server: HttpServer) => {
           .populate('mentions', 'name email profilePicture')
           .lean();
 
-        console.log(`Broadcasting message to room ${roomName}`);
-
         // Broadcast to all users in the channel
-        io.to(roomName).emit('new-message', populatedMessage);
+        console.log(`Broadcasting message from ${socket.user?.name} to channel ${channelId}`);
+        io.to(`channel:${channelId}`).emit('new-message', populatedMessage);
 
         // Update channel's last activity for all members
-        io.to(roomName).emit('channel-updated', {
+        io.to(`channel:${channelId}`).emit('channel-updated', {
           channelId,
           lastActivity: new Date(),
           messageCount: channel.messageCount + 1
         });
 
-        // Send confirmation to the sender
-        socket.emit('message-sent', { success: true, messageId: message._id });
+        // Send confirmation to sender
+        socket.emit('message-sent', {
+          success: true,
+          message: populatedMessage
+        });
+
+        console.log(`Message broadcasted successfully to channel ${channelId} by ${socket.user?.name}`);
 
       } catch (error) {
         console.error('Error sending message:', error);
         socket.emit('error', { message: 'Failed to send message' });
+        socket.emit('message-sent', {
+          success: false,
+          error: 'Failed to send message'
+        });
+      }
+    });
+
+    // Handle direct messages (legacy support)
+    socket.on('send_message', async (data: { receiver: string, content: string }) => {
+      try {
+        // NOTE: Legacy direct message support disabled - use inbox chat system instead
+        socket.emit('message_error', { message: 'Please use the inbox chat system for direct messages' });
+        return;
+        
+        /*
+        if (!socket.userId) return;
+
+        const { receiver, content } = data;
+        console.log(`Direct message from ${socket.user?.name} to ${receiver}: "${content}"`);
+
+        // Create new message
+        const newMessage = await Message.create({
+          sender: socket.userId,
+          receiver,
+          content,
+          read: false,
+          timestamp: new Date()
+        });
+
+        // Populate message with sender and receiver details
+        const populatedMessage = await Message.findById(newMessage._id)
+          .populate('sender', 'name email profilePicture')
+          .populate('receiver', 'name email profilePicture')
+          .lean();
+
+        // Send message to receiver if online
+        const receiverSocketId = connectedUsers.get(receiver);
+        if (receiverSocketId) {
+          socket.to(receiverSocketId).emit('receive_message', populatedMessage);
+          console.log(`Direct message delivered to ${receiver}`);
+        } else {
+          console.log(`Receiver ${receiver} is offline, message stored`);
+        }
+
+        // Acknowledge message receipt
+        socket.emit('message_sent', populatedMessage);
+        */
+      } catch (error) {
+        console.error('Error in direct message:', error);
+        socket.emit('message_error', { message: 'Failed to send message' });
       }
     });
 
@@ -342,6 +304,11 @@ export const initializeSocket = (server: HttpServer) => {
       emoji: string;
     }) => {
       try {
+        // NOTE: Reactions feature disabled for inbox messages - only available for community chat
+        socket.emit('error', { message: 'Reactions not supported for inbox messages' });
+        return;
+        
+        /*
         const { messageId, emoji } = data;
 
         const message = await Message.findById(messageId);
@@ -351,29 +318,30 @@ export const initializeSocket = (server: HttpServer) => {
         }
 
         // Find existing reaction with this emoji
-        const existingReaction = message.reactions.find(r => r.emoji === emoji);
+        const existingReaction = message.reactions?.find(r => r.emoji === emoji);
 
         if (existingReaction) {
           // Check if user already reacted with this emoji
-          if (existingReaction.users.some(user => user.toString() === authSocket.userId)) {
+          if (existingReaction.users.some(user => user.toString() === socket.userId)) {
             // Remove user's reaction
             existingReaction.users = existingReaction.users.filter(
-              u => u.toString() !== authSocket.userId
+              u => u.toString() !== socket.userId
             );
 
             // Remove reaction if no users left
             if (existingReaction.users.length === 0) {
-              message.reactions = message.reactions.filter(r => r.emoji !== emoji);
+              message.reactions = message.reactions?.filter(r => r.emoji !== emoji) || [];
             }
           } else {
             // Add user's reaction
-            existingReaction.users.push(new mongoose.Types.ObjectId(authSocket.userId!));
+            existingReaction.users.push(new mongoose.Types.ObjectId(socket.userId));
           }
         } else {
           // Create new reaction
+          if (!message.reactions) message.reactions = [];
           message.reactions.push({
             emoji,
-            users: [new mongoose.Types.ObjectId(authSocket.userId!)]
+            users: [new mongoose.Types.ObjectId(socket.userId)]
           });
         }
 
@@ -386,6 +354,7 @@ export const initializeSocket = (server: HttpServer) => {
           .lean();
 
         io.to(`channel:${message.channel}`).emit('message-updated', updatedMessage);
+        */
 
       } catch (error) {
         console.error('Error adding reaction:', error);
@@ -396,15 +365,15 @@ export const initializeSocket = (server: HttpServer) => {
     // Handle typing indicators
     socket.on('typing-start', (channelId: string) => {
       socket.to(`channel:${channelId}`).emit('user-typing', {
-        userId: authSocket.userId,
-        userName: authSocket.user?.name,
+        userId: socket.userId,
+        userName: socket.user?.name,
         channelId
       });
     });
 
     socket.on('typing-stop', (channelId: string) => {
       socket.to(`channel:${channelId}`).emit('user-stopped-typing', {
-        userId: authSocket.userId,
+        userId: socket.userId,
         channelId
       });
     });
@@ -412,47 +381,60 @@ export const initializeSocket = (server: HttpServer) => {
     // Handle user status updates
     socket.on('update-status', async (status: string) => {
       try {
-        await User.findByIdAndUpdate(authSocket.userId, { status });
+        if (!socket.userId) return;
+
+        await User.findByIdAndUpdate(socket.userId, { status });
 
         // Broadcast status update to all connected users
         socket.broadcast.emit('user-status-updated', {
-          userId: authSocket.userId,
+          userId: socket.userId,
           status
         });
+
+        console.log(`User ${socket.user?.name} status updated to ${status}`);
       } catch (error) {
         console.error('Error updating status:', error);
       }
     });
 
-    // Required Socket.IO event handlers
-    socket.on('connect_user', handleUserConnection);
-    socket.on('disconnect_user', handleUserDisconnection);
-    socket.on('send_message', handleNewMessage);
-
     // Handle disconnection
     socket.on('disconnect', async () => {
-      console.log(`User ${authSocket.user?.name} disconnected`);
+      console.log(`User ${socket.user?.name} disconnected`);
 
       try {
-        // Update user status to offline if no other connections
-        const userSockets = await io.in(`user:${authSocket.userId}`).allSockets();
-        if (userSockets.size === 0) {
-          await User.findByIdAndUpdate(authSocket.userId, {
-            status: 'offline',
-            lastSeen: new Date()
-          });
+        if (socket.userId) {
+          // Remove user from connected users map
+          connectedUsers.delete(socket.userId);
 
-          // Broadcast offline status
-          socket.broadcast.emit('user-status-updated', {
-            userId: authSocket.userId,
-            status: 'offline'
-          });
+          // Check if user has other connections
+          const userSockets = await io.in(`user:${socket.userId}`).allSockets();
+          if (userSockets.size === 0) {
+            // Update user status to offline if no other connections
+            await User.findByIdAndUpdate(socket.userId, {
+              status: 'offline',
+              lastSeen: new Date()
+            });
+
+            // Broadcast offline status
+            socket.broadcast.emit('user-status-updated', {
+              userId: socket.userId,
+              status: 'offline'
+            });
+
+            console.log(`User ${socket.user?.name} status updated to offline`);
+          }
         }
       } catch (error) {
         console.error('Error handling disconnect:', error);
       }
     });
+
+    // Auto-join channels when user connects
+    if (socket.userId) {
+      socket.emit('request-channel-join');
+    }
   });
 
+  console.log('Socket.IO server initialized with CORS for http://localhost:5173');
   return io;
 };

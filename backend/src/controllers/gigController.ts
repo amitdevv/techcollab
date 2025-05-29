@@ -148,12 +148,19 @@ export const createGig = async (req: AuthRequest, res: Response): Promise<void> 
 // Update gig
 export const updateGig = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    console.log('Update gig request received:', {
+      id: req.params.id,
+      userId: req.user?.id,
+      body: req.body
+    });
+
     if (!req.user?.id) {
       res.status(401).json({ message: 'User not authenticated' });
       return;
     }
 
     const gig = await Gig.findById(req.params.id);
+    console.log('Found gig:', gig ? 'Yes' : 'No');
 
     if (!gig) {
       res.status(404).json({ message: 'Gig not found' });
@@ -161,6 +168,12 @@ export const updateGig = async (req: AuthRequest, res: Response): Promise<void> 
     }
 
     // Check if user owns the gig
+    console.log('Gig owner check:', {
+      gigFreelancer: gig.freelancer.toString(),
+      currentUser: req.user.id,
+      match: gig.freelancer.toString() === req.user.id
+    });
+
     if (gig.freelancer.toString() !== req.user.id) {
       res.status(403).json({ message: 'Not authorized to update this gig' });
       return;
@@ -168,22 +181,32 @@ export const updateGig = async (req: AuthRequest, res: Response): Promise<void> 
 
     const { title, description, category, subCategory, price, deliveryTime, tags, images, status } = req.body;
 
+    // Prepare update object, only including images if provided
+    const updateData: any = {
+      title,
+      description,
+      category,
+      subCategory,
+      price: price ? parseFloat(price) : gig.price,
+      deliveryTime,
+      tags,
+      status
+    };
+
+    // Only update images if they are provided in the request
+    if (images !== undefined) {
+      updateData.images = images;
+    }
+
+    console.log('Update data:', updateData);
+
     const updatedGig = await Gig.findByIdAndUpdate(
       req.params.id,
-      {
-        title,
-        description,
-        category,
-        subCategory,
-        price: price ? parseFloat(price) : gig.price,
-        deliveryTime,
-        tags,
-        images,
-        status
-      },
+      updateData,
       { new: true, runValidators: true }
     ).populate('freelancer', 'name username picture profile.location');
 
+    console.log('Gig updated successfully');
     res.json(updatedGig);
   } catch (error) {
     console.error('Error in updateGig:', error);
@@ -322,5 +345,115 @@ export const getGigAnalytics = async (req: AuthRequest, res: Response): Promise<
   } catch (error) {
     console.error('Error in getGigAnalytics:', error);
     res.status(500).json({ message: 'Error fetching gig analytics' });
+  }
+};
+
+// Get trending gigs for dashboard
+export const getTrendingGigs = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 6;
+    
+    // Get gigs trending based on recent views, orders, and creation time
+    const trendingGigs = await Gig.find({ 
+      status: 'active',
+      createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Last 30 days
+    })
+      .populate('freelancer', 'name username picture profile.location status')
+      .sort({ 
+        views: -1, 
+        orders: -1, 
+        rating: -1, 
+        createdAt: -1 
+      })
+      .limit(limit)
+      .lean();
+
+    res.json(trendingGigs);
+  } catch (error) {
+    console.error('Error in getTrendingGigs:', error);
+    res.status(500).json({ message: 'Error fetching trending gigs' });
+  }
+};
+
+// Get top freelancers for dashboard
+export const getTopFreelancers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 6;
+
+    // Get top freelancers based on their gig performance
+    const topFreelancers = await User.aggregate([
+      // Match users who have active gigs
+      {
+        $lookup: {
+          from: 'gigs',
+          localField: '_id',
+          foreignField: 'freelancer',
+          as: 'gigs'
+        }
+      },
+      {
+        $match: {
+          'gigs.0': { $exists: true } // Has at least one gig
+        }
+      },
+      // Calculate aggregate stats
+      {
+        $addFields: {
+          activeGigs: {
+            $size: {
+              $filter: {
+                input: '$gigs',
+                cond: { $eq: ['$$this.status', 'active'] }
+              }
+            }
+          },
+          totalOrders: { $sum: '$gigs.orders' },
+          totalViews: { $sum: '$gigs.views' },
+          avgRating: { $avg: '$gigs.rating' },
+          totalRevenue: {
+            $sum: {
+              $map: {
+                input: '$gigs',
+                as: 'gig',
+                in: { $multiply: ['$$gig.orders', '$$gig.price'] }
+              }
+            }
+          }
+        }
+      },
+      // Sort by performance metrics
+      {
+        $sort: {
+          avgRating: -1,
+          totalOrders: -1,
+          totalRevenue: -1,
+          activeGigs: -1
+        }
+      },
+      {
+        $limit: limit
+      },
+      // Project only needed fields
+      {
+        $project: {
+          name: 1,
+          picture: 1,
+          profile: 1,
+          status: 1,
+          activeGigs: 1,
+          totalOrders: 1,
+          avgRating: 1,
+          skills: '$profile.skills',
+          title: { $arrayElemAt: ['$profile.skills', 0] }, // Use first skill as title
+          rating: '$avgRating',
+          reviewCount: '$totalOrders'
+        }
+      }
+    ]);
+
+    res.json(topFreelancers);
+  } catch (error) {
+    console.error('Error in getTopFreelancers:', error);
+    res.status(500).json({ message: 'Error fetching top freelancers' });
   }
 };
