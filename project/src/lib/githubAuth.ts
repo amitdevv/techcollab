@@ -1,5 +1,7 @@
 const GITHUB_CLIENT_ID = 'Ov23li9OAZchKLjCJwja';
-const GITHUB_REDIRECT_URI = 'http://localhost:5173';
+const GITHUB_REDIRECT_URI = import.meta.env.PROD
+  ? 'https://techcollab.vercel.app'
+  : 'http://localhost:5173';
 
 export const initiateGithubLogin = () => {
   const params = new URLSearchParams({

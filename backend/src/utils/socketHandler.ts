@@ -22,7 +22,9 @@ const connectedUsers = new Map<string, string>(); // userId -> socketId
 export const initializeSocket = (server: HttpServer) => {
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173", // Frontend URL
+      origin: process.env.NODE_ENV === 'production'
+        ? ['https://techcollab.vercel.app', 'https://*.vercel.app']
+        : ['http://localhost:5173', 'http://localhost:3000'],
       methods: ["GET", "POST"],
       credentials: true
     }
@@ -258,7 +260,7 @@ export const initializeSocket = (server: HttpServer) => {
         // NOTE: Legacy direct message support disabled - use inbox chat system instead
         socket.emit('message_error', { message: 'Please use the inbox chat system for direct messages' });
         return;
-        
+
         /*
         if (!socket.userId) return;
 
@@ -307,7 +309,7 @@ export const initializeSocket = (server: HttpServer) => {
         // NOTE: Reactions feature disabled for inbox messages - only available for community chat
         socket.emit('error', { message: 'Reactions not supported for inbox messages' });
         return;
-        
+
         /*
         const { messageId, emoji } = data;
 
@@ -435,6 +437,7 @@ export const initializeSocket = (server: HttpServer) => {
     }
   });
 
-  console.log('Socket.IO server initialized with CORS for http://localhost:5173');
+  const frontendUrl = process.env.NODE_ENV === 'production' ? 'https://techcollab.vercel.app' : 'http://localhost:5173';
+  console.log(`Socket.IO server initialized with CORS for ${frontendUrl}`);
   return io;
 };

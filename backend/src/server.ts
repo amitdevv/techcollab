@@ -15,13 +15,25 @@ import proposalRoutes from './routes/proposalRoutes';
 import aiRoutes from './routes/aiRoutes';
 import { initializeSocket } from './utils/socketHandler';
 
+
+
 dotenv.config();
 
 export const createApp = () => {
   const app = express();
 
-  // Middleware
-  app.use(cors());
+  // Middleware - Configure CORS for production
+  const corsOptions = {
+    origin: process.env.NODE_ENV === 'production'
+      ? ['https://techcollab.vercel.app', 'https://*.vercel.app']
+      : ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  };
+
+  app.use(cors(corsOptions));
   app.use(express.json());
 
   // Routes
@@ -51,11 +63,13 @@ const server = createServer(app);
 // Initialize Socket.IO
 const io = initializeSocket(server);
 
+// Define PORT constant for Render deployment
+const PORT = process.env.PORT || 5000;
+
 // Only connect to DB and start server if not in test mode
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
-  const PORT = process.env.PORT || 5000;
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`WebSocket server initialized`);
   });

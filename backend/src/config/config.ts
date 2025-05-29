@@ -10,10 +10,11 @@ const config = {
   emailPort: process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT, 10) : 587,
   emailUser: process.env.EMAIL_USER || 'user',
   emailPassword: process.env.EMAIL_PASSWORD || 'password',
-
   // Application settings
-  appName: process.env.APP_NAME || 'Your Application',
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  appName: process.env.APP_NAME || 'TechCollab',
+  frontendUrl: process.env.NODE_ENV === 'production'
+    ? process.env.PRODUCTION_FRONTEND_URL || 'https://techcollab.vercel.app'
+    : process.env.FRONTEND_URL || 'http://localhost:5173',
 
   // OAuth configurations
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
