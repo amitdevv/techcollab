@@ -28,4 +28,7 @@ dist-ssr
 .env.local
 .env.development.local
 .env.test.local
-node_modules
+
+# Documentation and guides
+*.md
+!README.md
