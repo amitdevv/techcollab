@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "rootDirectory": "project",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
