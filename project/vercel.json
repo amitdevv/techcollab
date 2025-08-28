@@ -4,7 +4,31 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        }
+      ]
+    },
+    {
+      "source": "/(.*).js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        }
+      ]
+    }
+  ],
   "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
