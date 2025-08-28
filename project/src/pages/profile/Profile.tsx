@@ -13,11 +13,10 @@ import {
 } from "../../lib/imageUtils";
 import {
   UserCircle,
+  CircleDollarSign ,
   Mail,
   LogOut,
-  Calendar,
-  Briefcase,
-  MessageSquare,
+  BadgeCheck ,
   Edit3,
   Github,
   Globe,
@@ -34,6 +33,7 @@ import {
   Target,
   TrendingUp,
   RefreshCw,
+  CalendarDays
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import {
@@ -397,7 +397,7 @@ const Profile: React.FC = () => {
     {
       label: "Active Gigs",
       value: userStats?.activeGigs?.toString() || "0",
-      icon: Briefcase,
+      icon: CircleDollarSign,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50",
       iconColor: "text-blue-600",
@@ -407,7 +407,7 @@ const Profile: React.FC = () => {
     {
       label: "Events",
       value: userStats?.events?.toString() || "0",
-      icon: Calendar,
+      icon: CalendarDays,
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50",
       iconColor: "text-green-600",
@@ -417,7 +417,7 @@ const Profile: React.FC = () => {
     {
       label: "Messages",
       value: userStats?.messages?.toString() || "0",
-      icon: MessageSquare,
+      icon: Mail,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50",
       iconColor: "text-purple-600",
@@ -541,9 +541,9 @@ const Profile: React.FC = () => {
                       <Mail className="h-4 w-4 mr-2 text-indigo-500" />
                       <span className="text-sm sm:text-base">{user?.email}</span>
                     </div>
-                    <div className="inline-flex items-center   text-xs font-medium  text-indigo-800">
-                    <img src="https://img.icons8.com/?size=250&id=36725&format=png&color=3730b8" alt="verified-badge" className="h-4 w-4 mr-1" />
-                       Premium Member
+                    <div className="inline-flex items-center   text-md font-medium  text-[#6265ee]">
+                    <BadgeCheck className="h-6 w-6 mr-2 text-indigo-500" />
+                    Premium Member
                     </div>
                   </div>
                   
@@ -852,7 +852,7 @@ const Profile: React.FC = () => {
                   className="w-full justify-start  "
                   variant="secondary"
                 >
-                  <MessageSquare className="h-4 w-4 mr-3" />
+                  <Mail  className="h-6 w-6 mr-3" />
                   View Messages
                 </Button>
                 <Button 
@@ -861,7 +861,7 @@ const Profile: React.FC = () => {
                   className="w-full justify-start border-purple-600 text-purple-600 "
 
                 >
-                  <Calendar className="h-4 w-4 mr-3" />
+                  <CalendarDays className="h-6 w-6 mr-3" />
                   My Events
                 </Button>
                 <Button 
@@ -871,7 +871,7 @@ const Profile: React.FC = () => {
 
 
                 >
-                  <Briefcase className="h-4 w-4 mr-3" />
+                  <CircleDollarSign  className="h-6 w-6 mr-3" />
                   Active Gigs
                 </Button>
               </div>

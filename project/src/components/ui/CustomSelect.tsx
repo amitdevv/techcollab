@@ -104,12 +104,12 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         className={cn(
           "relative w-full rounded-lg border px-4 py-3 text-left transition-all duration-200",
-          "focus:outline-none focus:ring-2 focus:ring-offset-1",
+          "focus:outline-none",
           disabled 
-            ? "cursor-not-allowed border-gray-200 dark:border-dark-buttonBg bg-gray-50 dark:bg-dark-bg/50 text-gray-400 dark:text-gray-500" 
+            ? "cursor-not-allowed border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#232323] text-gray-400 dark:text-gray-500" 
             : isOpen 
-              ? "border-emerald-500 dark:border-dark-button ring-2 ring-emerald-500/20 dark:ring-dark-button/20 shadow-lg bg-white dark:bg-dark-bg" 
-              : "border-emerald-200 dark:border-dark-buttonBg hover:border-emerald-300 dark:hover:border-dark-button hover:shadow-md bg-white dark:bg-dark-bg",
+              ? "border-[#4b5563] ring-2 ring-[#4b5563]/20 shadow-lg bg-white dark:bg-[#232323]" 
+              : "border-[#4b5563] hover:border-[#4b5563]/80 hover:shadow-md bg-white dark:bg-[#232323]",
           "text-sm font-medium"
         )}
         onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -120,7 +120,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       >
         <span className={cn(
           "block truncate pr-8",
-          selectedOption ? "text-gray-900 dark:text-dark-text" : "text-gray-500 dark:text-gray-400"
+          selectedOption ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"
         )}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
@@ -128,7 +128,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           <ChevronDown 
             className={cn(
               "h-4 w-4 transition-transform duration-200",
-              disabled ? "text-gray-400 dark:text-gray-500" : "text-emerald-500 dark:text-dark-button",
+              disabled ? "text-gray-400 dark:text-gray-500" : "text-[#4b5563] dark:text-gray-400",
               isOpen ? "rotate-180" : ""
             )} 
           />
@@ -136,7 +136,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-[9999] mt-2 w-full overflow-visible rounded-lg bg-white dark:bg-dark-bg shadow-xl ring-1 ring-black/5 animate-in fade-in-0 zoom-in-95 duration-200 border border-emerald-100 dark:border-dark-buttonBg">
+        <div className="absolute z-[9999] mt-2 w-full overflow-visible rounded-lg bg-white dark:bg-[#232323] shadow-xl ring-1 ring-black/5 animate-in fade-in-0 zoom-in-95 duration-200 border border-[#4b5563]">
           <div 
             ref={optionsRef}
             className="max-h-64 overflow-auto py-2"
@@ -148,9 +148,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 type="button"
                 className={cn(
                   "relative w-full cursor-pointer select-none py-3 px-4 text-left text-sm transition-colors duration-150",
-                  "hover:bg-emerald-50 dark:hover:bg-dark-buttonBg/20 hover:text-emerald-700 dark:hover:text-dark-text",
-                  highlightedIndex === index && "bg-emerald-50 dark:bg-dark-buttonBg/20 text-emerald-700 dark:text-dark-text",
-                  option.value === value && "bg-emerald-100 dark:bg-dark-button text-emerald-800 dark:text-white font-semibold"
+                  "hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-white",
+                  highlightedIndex === index && "bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-white",
+                  option.value === value && "bg-[#4b5563] text-white font-semibold"
                 )}
                 onClick={() => handleOptionClick(option.value)}
                 onMouseEnter={() => setHighlightedIndex(index)}
@@ -162,7 +162,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 </span>
                 {option.value === value && (
                   <span className="absolute inset-y-0 right-0 flex items-center pr-4">
-                    <div className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-white"></div>
+                    <div className="h-2 w-2 rounded-full bg-white"></div>
                   </span>
                 )}
               </button>

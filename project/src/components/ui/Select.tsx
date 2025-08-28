@@ -36,14 +36,14 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={cn('space-y-2', fullWidth ? 'w-full' : '')}>
         {label && (
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {label}
           </label>
         )}
         <select
           className={cn(
-            'h-10 w-full rounded-md border border-gray-300 dark:border-[#404040] bg-white dark:bg-[#232323] px-3 py-2 text-sm text-gray-900 dark:text-dark-text focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
-            error && 'border-error-500 focus:ring-error-500',
+            'h-10 w-full rounded-md border border-[#4b5563] bg-white dark:bg-[#232323] px-3 py-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+            error && 'border-red-500 focus:ring-red-500',
             className
           )}
           onChange={handleChange}
@@ -57,7 +57,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           ))}
         </select>
         {error && (
-          <p className="text-xs text-error-600">{error}</p>
+          <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
         )}
       </div>
     );

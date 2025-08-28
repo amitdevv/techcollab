@@ -235,8 +235,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     className={cn(
                       "flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200 group",
                       isActive
-                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-dark-button dark:to-dark-button text-white shadow-lg shadow-emerald-500/25 dark:shadow-dark-button/25"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-emerald-600 dark:hover:text-dark-button hover:shadow-md"
+                        ? "bg-[#00aa45] text-white shadow-lg shadow-[#00aa45]/25"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-[#00aa45] dark:hover:text-[#00aa45] hover:shadow-md"
                     )}
                   >
                     <span
@@ -244,7 +244,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         "transition-transform duration-200",
                         isActive
                           ? "text-white"
-                          : "text-emerald-600 dark:text-dark-button group-hover:scale-110"
+                          : "text-[#00aa45] dark:text-[#00aa45] group-hover:scale-110"
                       )}
                     >
                       {item.icon}
@@ -269,8 +269,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     className={cn(
                       "flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200 group relative",
                       isActive
-                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-dark-button dark:to-dark-button text-white shadow-lg shadow-emerald-500/25 dark:shadow-dark-button/25"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-emerald-600 dark:hover:text-dark-button hover:shadow-md"
+                        ? "bg-[#00aa45] text-white shadow-lg shadow-[#00aa45]/25"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-[#00aa45] dark:hover:text-[#00aa45] hover:shadow-md"
                     )}
                   >
                     <span
@@ -278,7 +278,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         "transition-transform duration-200",
                         isActive
                           ? "text-white"
-                          : "text-emerald-600 dark:text-dark-button group-hover:scale-110"
+                          : "text-[#00aa45] dark:text-[#00aa45] group-hover:scale-110"
                       )}
                     >
                       {item.icon}
@@ -290,7 +290,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                           "ml-auto text-xs px-2 py-1 min-w-[20px] h-5 flex items-center justify-center",
                           isActive
                             ? "bg-white/20 text-white"
-                            : "bg-emerald-500 dark:bg-dark-button text-white"
+                            : "bg-[#00aa45] text-white"
                         )}
                       >
                         {item.badge > 99 ? "99+" : item.badge}
@@ -310,9 +310,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.name}
                   onClick={item.action}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200 group text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-emerald-600 dark:hover:text-dark-button hover:shadow-md"
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200 group text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-[#00aa45] dark:hover:text-[#00aa45] hover:shadow-md"
                 >
-                  <span className="text-emerald-600 dark:text-dark-button group-hover:scale-110 transition-transform duration-200">
+                  <span className="text-[#00aa45] dark:text-[#00aa45] group-hover:scale-110 transition-transform duration-200">
                     {item.icon}
                   </span>
                   <div className="text-left">
@@ -337,8 +337,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     className={cn(
                       "flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200 group",
                       isActive
-                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-dark-button dark:to-dark-button text-white shadow-lg shadow-emerald-500/25 dark:shadow-dark-button/25"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-emerald-600 dark:hover:text-dark-button hover:shadow-md"
+                        ? "bg-[#00aa45] text-white shadow-lg shadow-[#00aa45]/25"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-[#00aa45] dark:hover:text-[#00aa45] hover:shadow-md"
                     )}
                   >
                     <span
@@ -346,7 +346,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         "transition-transform duration-200",
                         isActive
                           ? "text-white"
-                          : "text-emerald-600 dark:text-dark-button group-hover:scale-110"
+                          : "text-[#00aa45] dark:text-[#00aa45] group-hover:scale-110"
                       )}
                     >
                       {item.icon}
@@ -360,24 +360,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Profile card at the bottom - Removed theme toggle */}
           <div className="flex flex-col gap-4 mt-auto p-4">
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-white/60 dark:bg-dark-buttonBg/20 border border-emerald-100 dark:border-dark-buttonBg backdrop-blur-sm">
-              <Avatar
-                src={user?.picture}
-                alt={user?.name || "User"}
-                className="w-12 h-12 border-2 border-emerald-200 dark:border-dark-button shadow-md"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 dark:text-dark-text truncate">
-                  {user?.name || "Guest User"}
-                </p>
-                <Link
-                  to="/profile"
-                  className="text-xs text-emerald-600 dark:text-dark-button hover:text-emerald-700 dark:hover:text-dark-button/80 font-medium transition-colors"
-                >
-                  View Profile
-                </Link>
-              </div>
-            </div>
+            <Link
+              to="/profile"
+              className="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200 group text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-dark-buttonBg/30 hover:text-[#00aa45] dark:hover:text-[#00aa45] hover:shadow-md"
+            >
+              <UserCircle className="h-5 w-5 text-[#00aa45] dark:text-[#00aa45] group-hover:scale-110 transition-transform duration-200" />
+              <span className="text-sm">View Profile</span>
+            </Link>
           </div>
         </div>
       </aside>
