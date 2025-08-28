@@ -174,6 +174,50 @@
     transform: translateY(-2px);
   }
 
+  /* Dark mode helpers */
+  .dm-surface {
+    @apply dark:bg-[#232323] dark:border-[#404040];
+  }
+
+  .dm-text {
+    @apply dark:text-white;
+  }
+
+  .dm-text-muted {
+    @apply dark:text-gray-300;
+  }
+
+  .dm-link {
+    @apply dark:text-[#219653];
+  }
+
+  /* Scoped typography override for dark mode containers */
+  .dark .dark-typography,
+  .dark .dark-typography h1,
+  .dark .dark-typography h2,
+  .dark .dark-typography h3,
+  .dark .dark-typography h4,
+  .dark .dark-typography h5,
+  .dark .dark-typography h6,
+  .dark .dark-typography p,
+  .dark .dark-typography span,
+  .dark .dark-typography li,
+  .dark .dark-typography label,
+  .dark .dark-typography dt,
+  .dark .dark-typography dd {
+    color: #ffffff;
+  }
+
+  .dark .dark-typography .muted,
+  .dark .dark-typography small,
+  .dark .dark-typography .text-muted {
+    color: #d1d5db;
+  }
+
+  .dark .dark-typography a {
+    color: #219653;
+  }
+
   /* Custom scroll bars */
   ::-webkit-scrollbar {
     width: 6px;

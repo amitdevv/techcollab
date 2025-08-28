@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Button from "../ui/Button";
 
 const faqs = [
   {
@@ -109,9 +110,9 @@ const FAQ = () => {
           <p className="text-gray-600 dark:text-gray-300 mb-6">
             Still have questions? We're here to help!
           </p>
-          <button className="px-8 py-3 bg-green-500 dark:bg-dark-button text-white rounded-full font-medium hover:bg-green-600 dark:hover:bg-dark-button/90 transition-colors shadow-lg">
+          <Button variant="secondary" size="lg">
             Contact Support
-          </button>
+          </Button>
         </div>
       </div>
     </section>

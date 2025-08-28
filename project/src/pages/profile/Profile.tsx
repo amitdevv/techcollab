@@ -25,7 +25,6 @@ import {
   Twitter,
   Linkedin,
   Camera,
-  Save,
   X,
   Plus,
   CheckCircle,
@@ -436,10 +435,10 @@ const Profile: React.FC = () => {
         <div className="absolute top-40 left-1/2 w-60 h-60 bg-gradient-to-r from-green-400 to-green-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
       </div> */}
 
-      <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto dark-typography">
         {/* Success/Error Messages */}
         {saveSuccess && (
-          <div className="bg-green-50 dark:bg-dark-buttonBg/10 border border-green-200 dark:border-dark-buttonBg rounded-2xl p-4 shadow-lg animate-fade-in">
+          <div className="bg-green-50 dark:bg-[#232323] border border-green-200 dark:border-[#404040] rounded-2xl p-4 shadow-lg animate-fade-in">
             <div className="flex items-center">
               <CheckCircle className="h-5 w-5 text-green-500 dark:text-[#219653] mr-3" />
               <p className="text-sm font-medium text-green-800 dark:text-[#219653]">Profile updated successfully!</p>
@@ -448,7 +447,7 @@ const Profile: React.FC = () => {
         )}
         
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-2xl p-4 shadow-lg animate-fade-in">
+          <div className="bg-red-50 dark:bg-[#232323] border border-red-200 dark:border-[#404040] rounded-2xl p-4 shadow-lg animate-fade-in">
             <div className="flex items-center">
               <AlertCircle className="h-5 w-5 text-red-500 mr-3" />
               <p className="text-sm font-medium text-red-800 dark:text-red-400">{error}</p>
@@ -485,12 +484,12 @@ const Profile: React.FC = () => {
         )}
 
         {/* Profile Header - Enhanced */}
-        <div className="mb-8 backdrop-blur-xl bg-white/40 dark:bg-dark-buttonBg/10 border border-white/20 dark:border-dark-buttonBg/20 rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
-          <div className="relative px-6 sm:px-8 py-8 bg-white dark:bg-dark-buttonBg/20">
+        <div className="mb-8 bg-white dark:bg-[#232323] border border-gray-200 dark:border-[#404040] rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
+          <div className="relative px-6 sm:px-8 py-8 bg-white dark:bg-[#232323]">
             {/* Profile Picture */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-6 sm:space-y-0 sm:space-x-6">
               <div className="relative group flex-shrink-0">
-                <div className="relative h-32 w-32 sm:h-36 sm:w-36 overflow-hidden rounded-2xl border-6 border-white bg-white shadow-2xl">
+                <div className="relative h-32 w-32 sm:h-36 sm:w-36 overflow-hidden rounded-2xl border-6 border-white bg-white  shadow-2xl">
                   {imagePreview || user?.picture ? (
                     <img
                       src={imagePreview || getOptimizedImageUrl(user?.picture || '', { 
@@ -503,7 +502,7 @@ const Profile: React.FC = () => {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100">
+                    <div className="flex h-full w-full items-center justify-center bg-gray-100 dark:bg-[#232323]">
                       {uploadingImage ? (
                         <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-300 border-t-indigo-600"></div>
                       ) : (
@@ -526,8 +525,10 @@ const Profile: React.FC = () => {
                   </button>
                 </div>
                 
-                {/* Status indicator */}
-                <div className="absolute -bottom-2 -right-2 h-6 w-6 bg-green-500 border-3 border-white rounded-full shadow-lg"></div>
+                {/* Status indicator - show only when a profile image exists */}
+                {(imagePreview || user?.picture) && (
+                  <div className="absolute -bottom-2 -right-2 h-6 w-6 bg-green-500 border-3 border-white dark:border-[#232323] rounded-full shadow-lg"></div>
+                )}
               </div>
 
               <div className="flex-1 text-center sm:text-left min-w-0">
@@ -540,9 +541,9 @@ const Profile: React.FC = () => {
                       <Mail className="h-4 w-4 mr-2 text-indigo-500" />
                       <span className="text-sm sm:text-base">{user?.email}</span>
                     </div>
-                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                      <Star className="h-3 w-3 mr-1" />
-                      Premium Member
+                    <div className="inline-flex items-center   text-xs font-medium  text-indigo-800">
+                    <img src="https://img.icons8.com/?size=250&id=36725&format=png&color=3730b8" alt="verified-badge" className="h-4 w-4 mr-1" />
+                       Premium Member
                     </div>
                   </div>
                   
@@ -552,7 +553,8 @@ const Profile: React.FC = () => {
                         <Button
                           onClick={handleSaveProfile}
                           disabled={isSaving}
-                          className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6"
+                          variant="primary"
+                          className="px-6"
                         >
                           {isSaving ? (
                             <>
@@ -561,15 +563,14 @@ const Profile: React.FC = () => {
                             </>
                           ) : (
                             <>
-                              <Save className="mr-2 h-4 w-4" />
+                              
                               Save Changes
                             </>
                           )}
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           onClick={() => setIsEditing(false)}
-                          className="border-gray-200 text-gray-600 hover:bg-gray-50 backdrop-blur-sm bg-white/50"
                         >
                           <X className="mr-2 h-4 w-4" />
                           Cancel
@@ -577,18 +578,16 @@ const Profile: React.FC = () => {
                       </>
                     ) : (
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setIsEditing(true)}
-                        className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 backdrop-blur-sm bg-white/50 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
                         <Edit3 className="mr-2 h-4 w-4" />
                         Edit Profile
                       </Button>
                     )}
                     <Button
-                      variant="outline"
+                      variant="danger"
                       onClick={logout}
-                      className="border-red-200 text-red-600 hover:bg-red-50 backdrop-blur-sm bg-white/50"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
@@ -605,8 +604,8 @@ const Profile: React.FC = () => {
           {/* Left Column - Profile Details */}
           <div className="lg:col-span-8 space-y-6">
             {/* About Section */}
-            <div className="backdrop-blur-xl bg-white/40 dark:bg-dark-buttonBg/10 border border-white/20 dark:border-dark-buttonBg/20 rounded-2xl shadow-xl overflow-hidden animate-slide-in">
-              <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-dark-buttonBg/30 dark:to-dark-buttonBg/20 border-b border-white/20 dark:border-dark-buttonBg/20 p-6">
+            <div className="bg-white dark:bg-[#232323] border border-gray-200 dark:border-[#404040] rounded-2xl shadow-xl overflow-hidden animate-slide-in">
+              <div className="border-b border-gray-200 dark:border-[#404040] p-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text flex items-center">
                   <Award className="h-5 w-5 mr-2 text-indigo-600 dark:text-[#219653]" />
                   About
@@ -617,7 +616,7 @@ const Profile: React.FC = () => {
                   <Textarea
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    className="w-full bg-white/50 dark:bg-dark-buttonBg/20 backdrop-blur-sm border-white/20 dark:border-dark-buttonBg/20 dark:text-dark-text"
+                    className="w-full "
                     rows={4}
                     placeholder="Tell us about yourself..."
                   />
@@ -630,8 +629,8 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Skills Section */}
-            <div className="backdrop-blur-xl bg-white/40 dark:bg-dark-buttonBg/10 border border-white/20 dark:border-dark-buttonBg/20 rounded-2xl shadow-xl overflow-hidden animate-slide-in animation-delay-100">
-              <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-dark-buttonBg/30 dark:to-dark-buttonBg/20 border-b border-white/20 dark:border-dark-buttonBg/20 p-6">
+            <div className="bg-white dark:bg-[#232323] border border-gray-200 dark:border-[#404040] rounded-2xl shadow-xl overflow-hidden animate-slide-in animation-delay-100">
+              <div className="border-b border-gray-200 dark:border-[#404040] p-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text flex items-center">
                   <Target className="h-5 w-5 mr-2 text-green-600 dark:text-[#219653]" />
                   Skills
@@ -644,12 +643,12 @@ const Profile: React.FC = () => {
                       {formData.skills.map((skill) => (
                         <span
                           key={skill}
-                          className="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 px-4 py-2 text-sm font-medium text-indigo-700 shadow-sm"
+                          className="inline-flex items-center rounded-full px-4 py-2 text-sm font-medium shadow-sm bg-gray-100 text-gray-700 dark:bg-[#232323] dark:text-white dark:border dark:border-[#404040]"
                         >
                           {skill}
                           <button
                             onClick={() => handleRemoveSkill(skill)}
-                            className="ml-2 h-4 w-4 text-indigo-400 hover:text-indigo-600 transition-colors"
+                            className="ml-2 h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -661,12 +660,12 @@ const Profile: React.FC = () => {
                         value={newSkill}
                         onChange={(e) => setNewSkill(e.target.value)}
                         placeholder="Add a skill..."
-                        className="flex-1 bg-white/50 backdrop-blur-sm border-white/20"
+                        className="flex-1"
                         onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
                       />
                       <Button
                         onClick={handleAddSkill}
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
+                        variant="primary"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Add
@@ -679,7 +678,7 @@ const Profile: React.FC = () => {
                       formData.skills.map((skill) => (
                         <span
                           key={skill}
-                          className="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 px-4 py-2 text-sm font-medium text-indigo-700 shadow-sm hover:shadow-md transition-shadow"
+                          className="inline-flex items-center rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition-shadow bg-gray-100 text-gray-700 dark:bg-[#232323] dark:text-white dark:border dark:border-[#404040]"
                         >
                           {skill}
                         </span>
@@ -710,7 +709,6 @@ const Profile: React.FC = () => {
                         value={formData.location}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         placeholder="City, Country"
-                        className="bg-white/50 backdrop-blur-sm border-white/20"
                       />
                     </div>
                     <div>
@@ -720,17 +718,16 @@ const Profile: React.FC = () => {
                         value={formData.website}
                         onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                         placeholder="https://yourwebsite.com"
-                        className="bg-white/50 backdrop-blur-sm border-white/20"
                       />
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center p-3 rounded-xl bg-white/30 backdrop-blur-sm">
+                    <div className="flex items-center p-3 rounded-xl bg-[#f0f0f0] dark:bg-dark-buttonBg/20 backdrop-blur-sm">
                       <MapPin className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                       <span className="text-gray-700">{formData.location || "add your Location"}</span>
                     </div>
-                    <div className="flex items-center p-3 rounded-xl bg-white/30 backdrop-blur-sm">
+                    <div className="flex items-center p-3 rounded-xl bg-[#f0f0f0] dark:bg-dark-buttonBg/20 backdrop-blur-sm">
                       <Globe className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                       {formData.website ? (
                         <a
@@ -768,7 +765,6 @@ const Profile: React.FC = () => {
                         value={formData.github}
                         onChange={(e) => setFormData({ ...formData, github: e.target.value })}
                         placeholder="username"
-                        className="bg-white/50 backdrop-blur-sm border-white/20"
                       />
                     </div>
                     <div>
@@ -778,7 +774,6 @@ const Profile: React.FC = () => {
                         value={formData.twitter}
                         onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
                         placeholder="@username"
-                        className="bg-white/50 backdrop-blur-sm border-white/20"
                       />
                     </div>
                     <div>
@@ -788,13 +783,12 @@ const Profile: React.FC = () => {
                         value={formData.linkedin}
                         onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
                         placeholder="profile-name"
-                        className="bg-white/50 backdrop-blur-sm border-white/20"
                       />
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center p-3 rounded-xl bg-white/30 backdrop-blur-sm hover:bg-white/40 transition-colors group">
+                    <div className="flex items-center p-3 rounded-xl bg-[#f0f0f0] dark:bg-dark-buttonBg/20 backdrop-blur-sm  group">
                       <Github className="h-5 w-5 mr-3 text-purple-600 flex-shrink-0" />
                       {formData.github ? (
                         <a
@@ -809,7 +803,7 @@ const Profile: React.FC = () => {
                         <span className="text-gray-700">connect your GitHub</span>
                       )}
                     </div>
-                    <div className="flex items-center p-3 rounded-xl bg-white/30 backdrop-blur-sm hover:bg-white/40 transition-colors group">
+                    <div className="flex items-center p-3 rounded-xl bg-[#f0f0f0] dark:bg-dark-buttonBg/20 backdrop-blur-sm  group">
                       <Twitter className="h-5 w-5 mr-3 text-purple-600 flex-shrink-0" />
                       {formData.twitter ? (
                         <a
@@ -824,7 +818,7 @@ const Profile: React.FC = () => {
                         <span className="text-gray-700">connect your Twitter</span>
                       )}
                     </div>
-                    <div className="flex items-center p-3 rounded-xl bg-white/30 backdrop-blur-sm hover:bg-white/40 transition-colors group">
+                    <div className="flex items-center p-3 rounded-xl bg-[#f0f0f0] dark:bg-dark-buttonBg/20 backdrop-blur-sm group">
                       <Linkedin className="h-5 w-5 mr-3 text-purple-600 flex-shrink-0" />
                       {formData.linkedin ? (
                         <a
@@ -855,23 +849,27 @@ const Profile: React.FC = () => {
               <div className="p-6 space-y-3">
                 <Button 
                   onClick={handleViewMessages}
-                  className="w-full justify-start bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  className="w-full justify-start  "
+                  variant="secondary"
                 >
                   <MessageSquare className="h-4 w-4 mr-3" />
                   View Messages
                 </Button>
                 <Button 
                   onClick={handleMyEvents}
-                  variant="outline" 
-                  className="w-full justify-start border-purple-200 text-purple-600 hover:bg-purple-50 backdrop-blur-sm bg-white/50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  variant="secondary" 
+                  className="w-full justify-start border-purple-600 text-purple-600 "
+
                 >
                   <Calendar className="h-4 w-4 mr-3" />
                   My Events
                 </Button>
                 <Button 
                   onClick={handleActiveGigs}
-                  variant="outline" 
-                  className="w-full justify-start border-green-200 text-green-600 hover:bg-green-50 backdrop-blur-sm bg-white/50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  variant="secondary" 
+                  className="w-full justify-start "
+
+
                 >
                   <Briefcase className="h-4 w-4 mr-3" />
                   Active Gigs
@@ -912,13 +910,13 @@ const Profile: React.FC = () => {
                 <div
                   key={stat.label}
                   onClick={() => handleStatsClick(stat.label)}
-                  className={`backdrop-blur-xl bg-white/40 dark:bg-dark-buttonBg/10 border border-white/20 dark:border-dark-buttonBg/20 rounded-2xl shadow-xl overflow-hidden animate-slide-in hover:scale-105 transition-all duration-300 group cursor-pointer`}
+                  className={`bg-white dark:bg-[#232323] border border-gray-200 dark:border-[#404040] rounded-2xl shadow-xl overflow-hidden animate-slide-in hover:scale-105 transition-all duration-300 group cursor-pointer`}
                   style={{ animationDelay: `${(index + 4) * 100}ms` }}
                 >
-                  <div className={`${stat.bgColor} p-6`}>
+                  <div className={`p-6`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                        <div className={`p-3 rounded-xl bg-[#219653] shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                           <stat.icon className="h-6 w-6 text-white" />
                         </div>
                         <div>
@@ -968,18 +966,10 @@ const Profile: React.FC = () => {
             {/* Achievement Badge */}
             <div className="backdrop-blur-xl bg-gradient-to-br from-yellow-50/40 to-orange-50/40 dark:from-dark-buttonBg/20 dark:to-dark-buttonBg/10 border border-yellow-200/50 dark:border-dark-buttonBg/20 rounded-2xl shadow-xl overflow-hidden animate-slide-in animation-delay-800">
               <div className="p-6 text-center">
-                <div className="mb-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg">
-                    <Award className="h-8 w-8 text-white" />
-                  </div>
-                </div>
+               
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-2">Top Performer</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-500 mb-4">You're in the top 10% of active members this month!</p>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full" style={{ width: '90%' }}></div>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">90% to next level</p>
-              </div>
             </div>
           </div>
         </div>

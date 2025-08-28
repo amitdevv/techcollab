@@ -2,7 +2,15 @@ import React from "react";
 import { cn } from "../../lib/utils";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "outline" | "ghost" | "destructive" | "success";
+  variant?:
+    | "default"
+    | "outline"
+    | "ghost"
+    | "destructive"
+    | "success"
+    | "primary"
+    | "secondary"
+    | "danger";
   size?: "sm" | "md" | "lg";
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -22,18 +30,26 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   const baseClasses = "inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
-  const variants = {
-    default: "bg-green-500 dark:bg-dark-button text-white hover:bg-green-600 dark:hover:bg-dark-button/90 focus:ring-green-500 shadow-sm",
-    outline: "border border-gray-300 dark:border-dark-buttonBg bg-white dark:bg-dark-bg text-gray-700 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/20 focus:ring-green-500",
-    ghost: "text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-buttonBg/20 focus:ring-green-500",
+  const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
+    // Primary (very important): solid #219653, same in light/dark
+    default: "bg-[#219653] text-white hover:bg-[#1c7f46] focus:ring-[#219653] shadow-sm",
+    primary: "bg-[#219653] text-white hover:bg-[#1c7f46] focus:ring-[#219653] shadow-sm",
+    // Secondary (medium importance): outline with #219653
+    outline: "border border-[#219653] bg-white dark:bg-[#232323] text-[#219653] hover:bg-[#219653]/10 focus:ring-[#219653]",
+    secondary: "border border-[#219653] bg-white dark:bg-[#232323] text-[#219653] hover:bg-[#219653]/10 focus:ring-[#219653]",
+    // Ghost
+    ghost: "text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-buttonBg/20 focus:ring-[#219653]",
+    // Danger (logout / destructive)
     destructive: "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 shadow-sm",
-    success: "bg-emerald-500 dark:bg-dark-button text-white hover:bg-emerald-600 dark:hover:bg-dark-button/90 focus:ring-emerald-500 shadow-sm",
-  };
+    danger: "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 shadow-sm",
+    // Success retained for backward compat
+    success: "bg-emerald-500 text-white hover:bg-emerald-600 focus:ring-emerald-500 shadow-sm",
+  } as const;
 
   const sizes = {
-    sm: "px-3 py-1.5 text-sm",
+    sm: "px-3 py-1 text-sm",
     md: "px-4 py-2 text-sm",
-    lg: "px-6 py-3 text-base",
+    lg: "px-6 py-2 text-base",
   };
 
   return (

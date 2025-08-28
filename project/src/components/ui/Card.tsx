@@ -16,9 +16,9 @@ const Card: React.FC<CardProps> = ({
       className={cn(
         "rounded-lg transition-colors",
         {
-          default: "bg-white dark:bg-dark-buttonBg/10 shadow-sm border border-gray-200 dark:border-dark-buttonBg",
-          outlined: "border border-gray-200 dark:border-dark-buttonBg bg-transparent",
-          elevated: "bg-white dark:bg-dark-buttonBg/10 shadow-lg border border-gray-100 dark:border-dark-buttonBg",
+          default: "bg-white dark:bg-[#232323] shadow-sm border border-gray-200 dark:border-[#404040]",
+          outlined: "border border-gray-200 dark:border-[#404040] bg-transparent dark:bg-[#232323]",
+          elevated: "bg-white dark:bg-[#232323] shadow-lg border border-gray-100 dark:border-[#404040]",
         }[variant],
         className
       )}
@@ -39,7 +39,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({
   return (
     <div
       className={cn(
-        "flex flex-col space-y-1.5 p-6 border-b border-gray-200 dark:border-dark-buttonBg",
+        "flex flex-col space-y-1.5 p-6 border-b border-gray-200 dark:border-[#404040]",
         className
       )}
       {...props}
@@ -113,7 +113,7 @@ const CardFooter: React.FC<CardFooterProps> = ({
   return (
     <div
       className={cn(
-        "flex items-center p-6 pt-0 border-t border-gray-200 dark:border-dark-buttonBg",
+        "flex items-center p-6 pt-0 border-t border-gray-200 dark:border-[#404040]",
         className
       )}
       {...props}

@@ -1,9 +1,10 @@
-import React from "react";
-import { ArrowRight, Code, Users, MessageSquare, Sun, Moon } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { ArrowRight,ArrowUpRight , Code, Users, MessageSquare, Sun, Moon, Menu, X, Calendar, ShoppingBag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import Logo from "../ui/Logo";
+import Button from "../ui/Button";
 
 interface HeroProps {
   onAuthClick: () => void;
@@ -12,6 +13,22 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
   const navigate = useNavigate();
   const { toggleDarkMode, isDarkMode } = useTheme();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const toggleRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!isMenuOpen) return;
+      if (menuRef.current && menuRef.current.contains(target)) return;
+      if (toggleRef.current && toggleRef.current.contains(target)) return;
+      setIsMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -54,17 +71,17 @@ const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="absolute top-0 left-0 right-0 z-20 py-6"
+        className="fixed top-0 left-0 right-0 z-30 py-2 sm:py-3 bg-[#fafafa] dark:bg-[#232323]"
       >
         <div className="container mx-auto px-4">
-          <div className="flex justify-center items-center relative">
-            {/* Left side - Logo (positioned absolutely) */}
-            <div className="absolute left-0 w-32">
+          <div className="flex items-center justify-between">
+            {/* Left - Logo */}
+            <div className="shrink-0">
               <Logo width={120} height={38} className="hover:scale-105 transition-transform duration-300" />
             </div>
 
-            {/* Center Navigation Links */}
-            <div className="flex items-center space-x-8">
+            {/* Center - Nav (desktop only) */}
+            <div className="hidden md:flex items-center space-x-8">
               <Link
                 to="/signup"
                 className="font-medium text-gray-900 dark:text-dark-text hover:text-green-600 dark:hover:text-dark-button transition-colors"
@@ -85,91 +102,77 @@ const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
               </Link>
             </div>
 
-            {/* Right side - Auth Buttons and Theme Toggle (positioned absolutely) */}
-            <div className="absolute right-0 flex items-center space-x-4">
-              <Link
-                to="/login"
-                className="font-medium text-gray-900 dark:text-dark-text hover:text-green-600 dark:hover:text-dark-button transition-colors"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/signup"
-                className="px-4 py-2 rounded-md font-medium text-white bg-green-500 dark:bg-dark-button hover:bg-green-600 dark:hover:bg-dark-button/90 transition-colors shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all"
-              >
-                Create Profile
-              </Link>
-              <button
-                onClick={toggleDarkMode}
-                className="p-3 rounded-full bg-gray-100 dark:bg-dark-buttonBg text-gray-600 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-dark-buttonBg/80 transition-all duration-300 shadow-sm hover:shadow-md"
-                aria-label="Toggle theme"
-              >
-                {isDarkMode ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </button>
+            {/* Right - Actions */}
+            <div className="flex items-center gap-2">
+              {/* Mobile: icon buttons */}
+              <div className="flex md:hidden items-center gap-2">
+                <button
+                  onClick={toggleDarkMode}
+                  className="p-2 bg-transparent rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/10 transition-colors"
+                  aria-label="Toggle theme"
+                >
+                  {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </button>
+                <button
+                  onClick={() => setIsMenuOpen((v) => !v)}
+                  ref={toggleRef}
+                  className="p-2 rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-buttonBg/20"
+                  aria-label="Open menu"
+                >
+                  {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                </button>
+              </div>
+
+              {/* Desktop: text buttons */}
+              <div className="hidden md:flex items-center space-x-3">
+                <Link to="/login">
+                  <Button variant="secondary" size="md">Log in</Button>
+                </Link>
+                <Link to="/signup">
+                  <Button variant="primary" size="md">Create Profile</Button> 
+                </Link>
+                <button
+                  onClick={toggleDarkMode}
+                  className="p-2 bg-transparent rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/10 transition-colors"
+                  aria-label="Toggle theme"
+                >
+                  {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Mobile dropdown menu */}
+          {isMenuOpen && (
+            <div ref={menuRef} className="md:hidden mt-3 rounded-lg border border-gray-200 dark:border-dark-buttonBg bg-white dark:bg-[#1b1b1b] shadow-lg divide-y divide-gray-100 dark:divide-dark-buttonBg">
+              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/20">
+                <ShoppingBag className="h-5 w-5 text-green-600" />
+                <span>Marketplace</span>
+              </Link>
+              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/20">
+                <Calendar className="h-5 w-5 text-green-600" />
+                <span>Events</span>
+              </Link>
+              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/20">
+                <Users className="h-5 w-5 text-green-600" />
+                <span>Community</span>
+              </Link>
+            </div>
+          )}
         </div>
       </motion.header>
 
       {/* Background dot pattern - REMOVED */}
 
-      <div className="relative container mx-auto px-4">
-        {/* Floating UI Elements */}
-        <motion.div
-          variants={floatingVariants}
-          initial="initial"
-          animate="animate"
-          className="absolute left-10 top-32"
-        >
-          <div className="bg-white dark:bg-dark-buttonBg/20 rounded-lg shadow-lg p-4 rotate-[-6deg] border dark:border-dark-buttonBg">
-            <div className="w-48 h-32 bg-green-50 dark:bg-dark-button/10 rounded-md p-3">
-              <p className="text-sm text-gray-700 dark:text-dark-text font-medium">
-                Connect with top tech talent and collaborate on exciting
-                projects
-              </p>
-            </div>
-          </div>
-        </motion.div>
+      <div className="relative container mx-auto px-4 pt-12 sm:pt-8">
+       
+
 
         <motion.div
           variants={floatingVariants}
           initial="initial"
           animate="animate"
-          className="absolute right-10 top-40"
-        >
-          <div className="bg-white dark:bg-dark-buttonBg/20 rounded-lg shadow-lg p-3 rotate-[6deg] border dark:border-dark-buttonBg">
-            <div className="flex items-center space-x-3 w-48">
-              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-dark-button/20 flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-green-600 dark:text-dark-button"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-              </div>
-              <span className="text-sm font-medium text-gray-700 dark:text-dark-text">
-                Quick Response
-              </span>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          variants={floatingVariants}
-          initial="initial"
-          animate="animate"
-          className="absolute right-32 bottom-32"
+          className="absolute right-32 bottom-32 hidden md:block"
         >
           <div className="bg-white dark:bg-dark-buttonBg/20 rounded-lg shadow-lg p-4 rotate-[4deg] border dark:border-dark-buttonBg">
             <div className="flex items-center space-x-3">
@@ -201,11 +204,11 @@ const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-center justify-center min-h-screen py-20 text-center relative z-10 mt-8"
+          className="flex flex-col items-center justify-center min-h-screen py-20 sm:py-24 text-center relative z-10 mt-2 sm:mt-4"
         >
           <motion.h1
             variants={itemVariants}
-            className="max-w-4xl mx-auto text-[2.75rem] sm:text-6xl lg:text-7xl font-light tracking-tight text-black dark:text-dark-text [text-wrap:balance]"
+            className="max-w-4xl mx-auto text-4xl sm:text-6xl lg:text-6xl font-light tracking-tight text-black dark:text-dark-text [text-wrap:balance]"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             The All-in-One Platform for{" "}
@@ -239,32 +242,31 @@ const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
 
           <motion.p
             variants={itemVariants}
-            className="text-gray-600 dark:text-gray-300 mt-6 max-w-2xl mx-auto font-light text-lg sm:text-xl"
+            className="text-gray-600 dark:text-gray-300 mt-4 sm:mt-6 max-w-2xl mx-auto font-normal text-base sm:text-xl px-1"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
-            Showcase your work, find paid gigs, join vibrant communities and
-            explore the latest events — all in one powerful builder-first
-            platform
+            Showcase your work, find paid gigs, join tech communities
           </motion.p>
 
           <motion.div
             variants={itemVariants}
-            className="mt-10 flex flex-col items-center w-full max-w-md mx-auto"
+            className="mt-8 sm:mt-10 flex flex-col items-center w-full max-w-md mx-auto"
           >
             <div className="flex justify-center">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/signup")}
-                className="px-8 py-3 bg-green-500 dark:bg-dark-button text-white rounded-full font-medium hover:bg-green-600 dark:hover:bg-dark-button/90 transition-colors flex items-center gap-2 text-lg"
-              >
-                Get Started
-                <ArrowRight className="w-5 h-5" />
-              </motion.button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => navigate("/signup")}
+                  rightIcon={<ArrowUpRight className="w-5 h-5" />}
+                >
+                  Get Started
+                </Button>
+              </motion.div>
             </div>
             <motion.p
               variants={itemVariants}
-              className="text-sm text-gray-500 dark:text-gray-400 mt-4"
+              className="text-sm text-gray-500 dark:text-gray-400 mt-3 sm:mt-4 italic"
             >
               Join our community today and start collaborating!
             </motion.p>
