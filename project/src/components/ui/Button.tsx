@@ -25,10 +25,11 @@ const Button: React.FC<ButtonProps> = ({
   rightIcon,
   loading = false,
   children,
+
   disabled,
   ...props
 }) => {
-  const baseClasses = "inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseClasses = "inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
     // Primary (very important): solid #219653, same in light/dark

@@ -5,6 +5,13 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-primary: #00aa45;
+    --color-primary-hover: #009940;
+    --color-primary-light: #00aa45;
+    --color-primary-dark: #008a3a;
+  }
+
   html {
     -webkit-tap-highlight-color: transparent;
   }
@@ -229,12 +236,12 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #10b981, #059669);
+    background: linear-gradient(180deg, #00aa45, #009940);
     border-radius: 6px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #059669, #047857);
+    background: linear-gradient(180deg, #009940, #008a3a);
   }
 }
 

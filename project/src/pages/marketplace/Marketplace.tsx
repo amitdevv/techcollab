@@ -188,7 +188,7 @@ const MarketplacePage: React.FC = () => {
                       Marketplace
                     </h1>
                     <div className="flex items-center gap-2 mt-1">
-                      <Sparkles className="h-4 w-4 text-amber-500" />
+                     
                       <span className="text-amber-600 dark:text-amber-400 text-sm font-medium">Premium Talent Hub</span>
                     </div>
                   </div>

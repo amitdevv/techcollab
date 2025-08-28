@@ -207,7 +207,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex flex-col h-full overflow-y-auto">
           {/* Logo section - Enhanced visibility */}
           <div className="flex items-center justify-between h-20 px-6 py-4 border-b border-emerald-100 dark:border-dark-buttonBg bg-white/80 dark:bg-[#232323]/80 backdrop-blur-sm">
-            <Link to="/" className="flex items-center">
+            <Link to="/dashboard" className="flex items-center">
               <Logo width={140} height={45} className="hover:scale-105 transition-transform duration-300" />
             </Link>
             <button

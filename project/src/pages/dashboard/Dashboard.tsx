@@ -20,6 +20,8 @@ import {
   RefreshCw,
   BarChart3,
   Award,
+  Activity,
+  Target,
 } from "lucide-react";
 import {
   Card,
@@ -191,32 +193,42 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="p-6 space-y-8 animate-fade-in max-w-7xl mx-auto">
-      {/* Personalized Welcome Header */}
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-[#171717] dark:to-[#171717] rounded-2xl p-8 shadow-lg border border-green-100 dark:border-dark-buttonBg relative overflow-hidden">
+      {/* Enhanced Welcome Header */}
+      <div className="bg-gradient-to-br from-[#00aa45]/5 via-[#00aa45]/10 to-[#00aa45]/5 dark:from-[#00aa45]/10 dark:via-[#00aa45]/5 dark:to-[#00aa45]/10 rounded-3xl p-8 shadow-xl border border-[#00aa45]/20 relative overflow-hidden">
         <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-dark-text mb-2">
-                {getGreeting()}, {user?.name?.split(" ")[0] || "there"} {getGreetingEmoji()}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 text-lg mb-4">
-                Here's what's happening in your workspace today
-              </p>
-              <div className="flex items-center gap-4">
-                <Badge className="bg-green-100 dark:bg-[#171717] text-green-800 dark:text-[#219653] border-green-200 dark:border-[#219653] px-3 py-1 rounded-md">
-                  <Award className="h-4 w-4 mr-1" />
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#00aa45] to-[#009940] rounded-2xl flex items-center justify-center shadow-lg">
+                  <Activity className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                    {getGreeting()}, {user?.name?.split(" ")[0] || "there"} {getGreetingEmoji()}
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-300 text-lg">
+                    Here's what's happening in your workspace today
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-4">
+                <Badge className="bg-[#00aa45]/20 dark:bg-[#00aa45]/20 text-[#00aa45] dark:text-[#00aa45] border-[#00aa45]/30 dark:border-[#00aa45]/30 px-4 py-2 rounded-xl text-sm font-medium">
+                  <Award className="h-4 w-4 mr-2" />
                   Premium Member
                 </Badge>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Last updated: {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-[#232323]/50 px-3 py-2 rounded-lg">
+                  <Clock className="h-4 w-4" />
+                  <span>Last updated: {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
               </div>
             </div>
+            
             <Button
               onClick={handleRefresh}
               disabled={refreshing}
               variant="outline"
-              className="border-green-200 dark:border-[#219653] text-green-600 dark:text-[#219653] hover:bg-green-50 dark:hover:bg-[#171717] shadow-lg"
+              className="border-[#00aa45] text-[#00aa45] hover:bg-[#00aa45] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -224,41 +236,42 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
         
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-green-200/30 to-emerald-300/30 dark:from-[#219653]/10 dark:to-[#219653]/5 rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-emerald-200/30 to-green-300/30 dark:from-[#219653]/10 dark:to-[#219653]/5 rounded-full blur-3xl translate-y-24 -translate-x-24"></div>
+        {/* Enhanced background decoration */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-[#00aa45]/20 to-[#009940]/20 dark:from-[#00aa45]/15 dark:to-[#009940]/15 rounded-full blur-3xl -translate-y-36 translate-x-36"></div>
+        <div className="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-[#009940]/20 to-[#00aa45]/20 dark:from-[#009940]/15 dark:to-[#00aa45]/15 rounded-full blur-3xl translate-y-28 -translate-x-28"></div>
+        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-gradient-to-br from-[#00aa45]/10 to-[#009940]/10 dark:from-[#00aa45]/8 dark:to-[#009940]/8 rounded-full blur-2xl -translate-x-16 -translate-y-16"></div>
       </div>
 
       {/* Quick Action Buttons */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <ActionCard
           icon={<PlusCircle className="h-6 w-6" />}
-          bgColor="bg-green-50"
-          iconColor="text-green-600"
+          bgColor="bg-gradient-to-br from-[#00aa45]/10 to-[#009940]/10"
+          iconColor="text-[#00aa45]"
           title="Create Gig"
           description="💼 Post a new freelance service"
           onClick={() => navigate("/marketplace/create")}
         />
         <ActionCard
           icon={<Search className="h-6 w-6" />}
-          bgColor="bg-emerald-50"
-          iconColor="text-emerald-600"
+          bgColor="bg-gradient-to-br from-blue-500/10 to-indigo-500/10"
+          iconColor="text-blue-600"
           title="Browse Gigs"
           description="💸 Find available opportunities"
           onClick={() => navigate("/marketplace")}
         />
         <ActionCard
           icon={<Calendar className="h-6 w-6" />}
-          bgColor="bg-blue-50"
-          iconColor="text-blue-600"
+          bgColor="bg-gradient-to-br from-purple-500/10 to-pink-500/10"
+          iconColor="text-purple-600"
           title="Events"
           description="📅 Join or create events"
           onClick={() => navigate("/events")}
         />
         <ActionCard
           icon={<Users className="h-6 w-6" />}
-          bgColor="bg-purple-50"
-          iconColor="text-purple-600"
+          bgColor="bg-gradient-to-br from-amber-500/10 to-orange-500/10"
+          iconColor="text-amber-600"
           title="Community"
           description="🧑‍🤝‍🧑 Connect with others"
           onClick={() => navigate("/community")}
@@ -266,13 +279,13 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white dark:bg-[#333333] rounded-2xl p-6">
         <StatsCard
           title="Active Projects"
           value={dashboardStats.activeProjects.toString()}
           change="+8%"
           positive={true}
-          icon={<BarChart3 className="h-5 w-5" />}
+          icon={<Target className="h-5 w-5" />}
           description="From last month"
           loading={statsLoading}
         />
@@ -290,7 +303,7 @@ const DashboardPage: React.FC = () => {
           value={`${dashboardStats.successRate}%`}
           change="+2%"
           positive={true}
-          icon={<Award className="h-5 w-5" />}
+          icon={<TrendingUp className="h-5 w-5" />}
           description="Project completion"
           loading={statsLoading}
         />
@@ -515,19 +528,19 @@ const ActionCard = ({
   iconColor: string;
 }) => (
   <div
-    className="p-4 border border-gray-200 dark:border-dark-buttonBg hover:border-green-300 dark:hover:border-[#219653] transition-all duration-300 hover:shadow-xl cursor-pointer bg-white dark:bg-[#171717] rounded-2xl group transform hover:scale-105"
+    className="p-6 border-0 hover:border-[#00aa45]/30 transition-all duration-300 hover:shadow-xl cursor-pointer bg-white dark:bg-[#333333] rounded-2xl group transform hover:scale-105 hover:-translate-y-1"
     onClick={onClick}
   >
     <Card className="h-full border-0 shadow-none bg-transparent dark:bg-transparent">
-      <div className="flex items-start space-x-3">
-        <div className={`p-2.5 rounded-lg ${bgColor} dark:bg-[#171717] ${iconColor} dark:text-[#219653] group-hover:scale-110 transition-transform duration-300 shadow-md dark:shadow-none`}>
+      <div className="flex items-start space-x-4">
+        <div className={`p-3 rounded-xl ${bgColor} ${iconColor} group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-base text-gray-900 dark:text-dark-text group-hover:text-green-700 dark:group-hover:text-[#219653] transition-colors leading-tight">
+          <h3 className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-[#00aa45] dark:group-hover:text-[#00aa45] transition-colors leading-tight">
             {title}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-2 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors leading-relaxed">
             {description}
           </p>
         </div>
@@ -536,7 +549,7 @@ const ActionCard = ({
   </div>
 );
 
-// Stats Card Component
+// Enhanced Stats Card Component
 const StatsCard = ({
   title,
   value,
@@ -554,34 +567,34 @@ const StatsCard = ({
   description: string;
   loading?: boolean;
 }) => (
-  <Card className="border border-gray-200 dark:border-dark-buttonBg shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
+  <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden bg-white dark:bg-[#232323]">
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className={`p-3 rounded-xl ${positive ? 'bg-green-50 dark:bg-[#171717]' : 'bg-red-50 dark:bg-[#171717]'} shadow-lg`}>
-            <div className={positive ? 'text-green-600 dark:text-[#219653]' : 'text-red-600 dark:text-red-400'}>
+        <div className="flex items-center gap-4">
+          <div className={`p-3 rounded-xl ${positive ? 'bg-[#00aa45]/10 dark:bg-[#00aa45]/10' : 'bg-red-500/10 dark:bg-red-500/10'} shadow-lg`}>
+            <div className={positive ? 'text-[#00aa45] dark:text-[#00aa45]' : 'text-red-600 dark:text-red-400'}>
               {icon}
             </div>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{title}</p>
             {loading ? (
-              <div className="h-8 w-16 bg-gray-200 dark:bg-dark-buttonBg rounded animate-pulse"></div>
+              <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             ) : (
-              <p className="text-2xl font-bold text-gray-900 dark:text-dark-text">{value}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
             )}
           </div>
         </div>
         <div className="text-right">
           {loading ? (
-            <div className="space-y-1">
-              <div className="h-4 w-8 bg-gray-200 dark:bg-dark-buttonBg rounded animate-pulse"></div>
-              <div className="h-3 w-12 bg-gray-200 dark:bg-dark-buttonBg rounded animate-pulse"></div>
+            <div className="space-y-2">
+              <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             </div>
           ) : (
             <>
               <div className={`flex items-center text-sm font-medium ${
-                positive ? 'text-green-600 dark:text-[#219653]' : 'text-red-600 dark:text-red-400'
+                positive ? 'text-[#00aa45] dark:text-[#00aa45]' : 'text-red-600 dark:text-red-400'
               }`}>
                 <TrendingUp className={`h-4 w-4 mr-1 ${positive ? '' : 'rotate-180'}`} />
                 {change}
@@ -598,7 +611,7 @@ const StatsCard = ({
 // Enhanced Gig Card Row Component
 const GigRow = ({ gig }: { gig: Gig }) => (
   <div
-    className="p-5 hover:bg-gradient-to-r hover:from-green-50/50 hover:to-emerald-50/50 dark:hover:from-[#171717] dark:hover:to-[#171717] transition-all duration-300 cursor-pointer group"
+    className="p-6 hover:bg-gradient-to-r hover:from-[#00aa45]/5 hover:to-[#009940]/5 dark:hover:from-[#00aa45]/10 dark:hover:to-[#009940]/10 transition-all duration-300 cursor-pointer group"
     onClick={() => window.location.href = `/marketplace/${gig._id}`}
   >
     <div className="flex items-center space-x-4">
@@ -608,16 +621,16 @@ const GigRow = ({ gig }: { gig: Gig }) => (
           alt={gig.freelancer?.name || "User"}
           size="md"
           status={gig.freelancer?.status as any}
-          className="ring-2 ring-white dark:ring-dark-buttonBg shadow-lg group-hover:ring-green-200 dark:group-hover:ring-[#219653] transition-all"
+          className="ring-2 ring-white dark:ring-gray-700 shadow-lg group-hover:ring-[#00aa45]/30 transition-all"
         />
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-dark-text truncate group-hover:text-green-700 dark:group-hover:text-[#219653] transition-colors">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-[#00aa45] dark:group-hover:text-[#00aa45] transition-colors">
           {gig.title}
         </h4>
         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">by {gig.freelancer?.name}</p>
         <div className="mt-2 flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-[#171717] dark:to-[#171717] text-green-700 dark:text-[#219653] rounded-md border-green-200 dark:border-[#219653] font-medium">
+          <Badge className="bg-gradient-to-r from-[#00aa45]/10 to-[#009940]/10 text-[#00aa45] dark:text-[#00aa45] rounded-md border-[#00aa45]/20 dark:border-[#00aa45]/20 font-medium">
             ${gig.price}
           </Badge>
           <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -625,7 +638,7 @@ const GigRow = ({ gig }: { gig: Gig }) => (
           </span>
         </div>
       </div>
-      <ChevronRight className="h-5 w-5 text-gray-400 dark:text-gray-600 group-hover:text-green-500 dark:group-hover:text-[#219653] group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="h-5 w-5 text-gray-400 dark:text-gray-600 group-hover:text-[#00aa45] dark:group-hover:text-[#00aa45] group-hover:translate-x-1 transition-all" />
     </div>
   </div>
 );
@@ -633,7 +646,7 @@ const GigRow = ({ gig }: { gig: Gig }) => (
 // Enhanced Freelancer Row Component
 const FreelancerRow = ({ freelancer }: { freelancer: Freelancer }) => (
   <div
-    className="p-4 hover:bg-gradient-to-r hover:from-amber-50/50 hover:to-yellow-50/50 dark:hover:from-[#171717] dark:hover:to-[#171717] transition-all duration-300 cursor-pointer group"
+    className="p-4 hover:bg-gradient-to-r hover:from-amber-500/5 hover:to-yellow-500/5 dark:hover:from-amber-500/10 dark:hover:to-yellow-500/10 transition-all duration-300 cursor-pointer group"
     onClick={() => window.location.href = `/profile/${freelancer._id}`}
   >
     <div className="flex items-center space-x-3">
@@ -643,11 +656,11 @@ const FreelancerRow = ({ freelancer }: { freelancer: Freelancer }) => (
           alt={freelancer.name}
           size="md"
           status={freelancer.status as any}
-          className="ring-2 ring-white dark:ring-dark-buttonBg shadow-lg group-hover:ring-amber-200 dark:group-hover:ring-[#219653] transition-all"
+          className="ring-2 ring-white dark:ring-gray-700 shadow-lg group-hover:ring-amber-200 dark:group-hover:ring-[#00aa45]/30 transition-all"
         />
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium text-gray-900 dark:text-dark-text truncate group-hover:text-amber-700 dark:group-hover:text-[#219653] transition-colors">
+        <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-amber-700 dark:group-hover:text-[#00aa45] transition-colors">
           {freelancer.name}
         </h4>
         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
@@ -660,7 +673,7 @@ const FreelancerRow = ({ freelancer }: { freelancer: Freelancer }) => (
                 key={i}
                 className={`h-3 w-3 ${
                   i < (freelancer.rating || 0)
-                    ? "text-yellow-400 dark:text-[#219653] fill-yellow-400 dark:fill-[#219653]"
+                    ? "text-yellow-400 dark:text-[#00aa45] fill-yellow-400 dark:fill-[#00aa45]"
                     : "text-gray-300 dark:text-gray-600"
                 }`}
               />
@@ -686,17 +699,17 @@ const EventRow = ({ event }: { event: Event }) => {
 
   return (
     <div
-      className="p-4 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 dark:hover:from-[#171717] dark:hover:to-[#171717] transition-all duration-300 cursor-pointer group"
+      className="p-4 hover:bg-gradient-to-r hover:from-blue-500/5 hover:to-indigo-500/5 dark:hover:from-blue-500/10 dark:hover:to-indigo-500/10 transition-all duration-300 cursor-pointer group"
       onClick={() => window.location.href = `/events/${event._id}`}
     >
       <div className="flex items-center space-x-3">
         <div className="flex-shrink-0">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-[#171717] dark:to-[#171717] flex items-center justify-center">
-            <Calendar className="h-5 w-5 text-blue-600 dark:text-[#219653]" />
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-500/10 dark:to-indigo-500/10 flex items-center justify-center">
+            <Calendar className="h-5 w-5 text-blue-600 dark:text-[#00aa45]" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-dark-text truncate group-hover:text-blue-700 dark:group-hover:text-[#219653] transition-colors">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-blue-700 dark:group-hover:text-[#00aa45] transition-colors">
             {event.title}
           </h4>
           <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -712,7 +725,7 @@ const EventRow = ({ event }: { event: Event }) => {
             </div>
           )}
         </div>
-        <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-600 group-hover:text-blue-500 dark:group-hover:text-[#219653] group-hover:translate-x-1 transition-all" />
+        <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-600 group-hover:text-blue-500 dark:group-hover:text-[#00aa45] group-hover:translate-x-1 transition-all" />
       </div>
     </div>
   );

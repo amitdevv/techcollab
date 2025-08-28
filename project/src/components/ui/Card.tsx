@@ -14,7 +14,7 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       className={cn(
-        "rounded-lg transition-colors",
+        "rounded-md transition-colors",
         {
           default: "bg-white dark:bg-[#232323] shadow-sm border border-gray-200 dark:border-[#404040]",
           outlined: "border border-gray-200 dark:border-[#404040] bg-transparent dark:bg-[#232323]",
