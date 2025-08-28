@@ -168,36 +168,7 @@ const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
        
 
 
-        <motion.div
-          variants={floatingVariants}
-          initial="initial"
-          animate="animate"
-          className="absolute right-32 bottom-32 hidden md:block"
-        >
-          <div className="bg-white dark:bg-dark-buttonBg/20 rounded-lg shadow-lg p-4 rotate-[4deg] border dark:border-dark-buttonBg">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-dark-button/20 flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-green-600 dark:text-dark-button"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <div className="text-sm">
-                <p className="font-medium text-gray-900 dark:text-dark-text">Projects</p>
-                <p className="text-gray-500 dark:text-gray-400">View all tasks</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        
 
         {/* Main Content */}
         <motion.div
