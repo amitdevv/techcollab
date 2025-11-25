@@ -225,23 +225,27 @@
     color: #219653;
   }
 
-  /* Custom scroll bars */
+  /* Hide scrollbars */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 0px;
+    height: 0px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 6px;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #00aa45, #009940);
-    border-radius: 6px;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #009940, #008a3a);
+    background: transparent;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: none;
   }
 }
 

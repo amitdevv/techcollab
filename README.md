@@ -16,20 +16,6 @@
 
 </div>
 
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [Environment Setup](#environment-setup)
-- [Usage](#usage)
-- [AI Features](#ai-features)
-- [API Documentation](#api-documentation)
-- [Deployment](#deployment)
-- [Theme System](#theme-system)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
@@ -368,16 +354,5 @@ We welcome contributions! Please follow these steps:
 - Update documentation
 - Ensure responsive design
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-<div align="center">
-
-**Built with love by [Your Name](https://github.com/yourusername)**
-
-[Star this repo](https://github.com/amitdevv/techcollab) • [Report Bug](https://github.com/amitdevv/techcollab/issues) • [Request Feature](https://github.com/amitdevv/techcollab/issues)
-
-</div> 

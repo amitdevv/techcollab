@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ArrowRight,ArrowUpRight , Code, Users, MessageSquare, Sun, Moon, Menu, X, Calendar, ShoppingBag } from "lucide-react";
+import { Menu, X, Calendar, ShoppingBag, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { useTheme } from "../../context/ThemeContext";
-import Logo from "../ui/Logo";
-import Button from "../ui/Button";
 
 interface HeroProps {
   onAuthClick: () => void;
@@ -12,7 +8,6 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
   const navigate = useNavigate();
-  const { toggleDarkMode, isDarkMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
@@ -30,75 +25,38 @@ const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.3,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-      },
-    },
-  };
-
-  const floatingVariants = {
-    initial: { y: 0 },
-    animate: {
-      y: [-10, 10, -10],
-      transition: {
-        duration: 6,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
-    },
-  };
-
   return (
-    <section className="relative min-h-screen bg-[#fafafa] dark:bg-[#232323] overflow-hidden">
-      {/* Header Navigation - Centered */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="fixed top-0 left-0 right-0 z-30 py-2 sm:py-3 bg-[#fafafa] dark:bg-[#232323]"
-      >
-        <div className="container mx-auto px-4">
+    <section className="relative min-h-screen bg-white overflow-hidden">
+      {/* Header Navigation */}
+      <header className="fixed top-0 left-0 right-0 z-30 py-3 sm:py-4 bg-white/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            {/* Left - Logo */}
+            {/* Left - Brand Name */}
             <div className="shrink-0">
-              <Logo width={120} height={38} className="hover:scale-105 transition-transform duration-300" />
+              <Link to="/" className="text-xl sm:text-2xl font-semibold text-black hover:opacity-80 transition-opacity tracking-tight">
+                TechCollab
+              </Link>
             </div>
 
             {/* Center - Nav (desktop only) */}
             <div className="hidden md:flex items-center space-x-8">
               <Link
                 to="/signup"
-                className="font-medium text-gray-900 dark:text-dark-text hover:text-green-600 dark:hover:text-dark-button transition-colors"
+                className="font-medium text-gray-900 hover:text-black transition-colors"
               >
-                MarketPlace
+                Freelancer
               </Link>
               <Link
                 to="/signup"
-                className="font-medium text-gray-900 dark:text-dark-text hover:text-green-600 dark:hover:text-dark-button transition-colors"
+                className="font-medium text-gray-900 hover:text-black transition-colors"
               >
                 Events
               </Link>
               <Link
                 to="/signup"
-                className="font-medium text-gray-900 dark:text-dark-text hover:text-green-600 dark:hover:text-dark-button transition-colors"
+                className="font-medium text-gray-900 hover:text-black transition-colors"
               >
-                Community
+                Communities
               </Link>
             </div>
 
@@ -107,16 +65,9 @@ const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
               {/* Mobile: icon buttons */}
               <div className="flex md:hidden items-center gap-2">
                 <button
-                  onClick={toggleDarkMode}
-                  className="p-2 bg-transparent rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/10 transition-colors"
-                  aria-label="Toggle theme"
-                >
-                  {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                </button>
-                <button
                   onClick={() => setIsMenuOpen((v) => !v)}
                   ref={toggleRef}
-                  className="p-2 rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-buttonBg/20"
+                  className="p-2 rounded-md text-gray-700 hover:bg-gray-100"
                   aria-label="Open menu"
                 >
                   {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -126,211 +77,80 @@ const Hero: React.FC<HeroProps> = ({ onAuthClick }) => {
               {/* Desktop: text buttons */}
               <div className="hidden md:flex items-center space-x-3">
                 <Link to="/login">
-                  <Button variant="secondary" size="md">Log in</Button>
+                  <button className="px-4 py-2 font-medium text-gray-900 hover:text-black transition-colors">
+                    Log in
+                  </button>
                 </Link>
                 <Link to="/signup">
-                  <Button variant="primary" size="md">Create Profile</Button> 
+                  <button className="px-6 py-2 bg-black text-white rounded-lg font-medium hover:opacity-90 transition-opacity">
+                    Sign up
+                  </button>
                 </Link>
-                <button
-                  onClick={toggleDarkMode}
-                  className="p-2 bg-transparent rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/10 transition-colors"
-                  aria-label="Toggle theme"
-                >
-                  {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                </button>
               </div>
             </div>
           </div>
 
           {/* Mobile dropdown menu */}
           {isMenuOpen && (
-            <div ref={menuRef} className="md:hidden mt-3 rounded-lg border border-gray-200 dark:border-dark-buttonBg bg-white dark:bg-[#1b1b1b] shadow-lg divide-y divide-gray-100 dark:divide-dark-buttonBg">
-              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/20">
-                <ShoppingBag className="h-5 w-5 text-green-600" />
-                <span>Marketplace</span>
+            <div ref={menuRef} className="md:hidden mt-3 rounded-lg border border-gray-200 bg-white shadow-lg divide-y divide-gray-100">
+              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                <ShoppingBag className="h-5 w-5 text-black" />
+                <span>Freelancer</span>
               </Link>
-              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/20">
-                <Calendar className="h-5 w-5 text-green-600" />
+              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                <Calendar className="h-5 w-5 text-black" />
                 <span>Events</span>
               </Link>
-              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-buttonBg/20">
-                <Users className="h-5 w-5 text-green-600" />
-                <span>Community</span>
+              <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                <Users className="h-5 w-5 text-black" />
+                <span>Communities</span>
               </Link>
             </div>
           )}
         </div>
-      </motion.header>
+      </header>
 
-      {/* Background dot pattern - REMOVED */}
+      {/* Main Hero Content - Column Layout with rounded #f2f2f2 background */}
+      <div className="relative pt-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#f2f2f2] rounded-3xl">
+            <div className="flex flex-col items-center justify-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8">
 
-      <div className="relative container mx-auto px-4 pt-12 sm:pt-8">
-       
+              {/* Content - Top */}
+              <div className="w-full max-w-4xl text-center">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-medium tracking-tight text-black leading-tight">
+                  The app that works for{" "}
+                  <span className="font-semibold">freelancers</span>
+                </h1>
 
+                <p className="mt-6 text-base sm:text-lg font-normal text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                  Showcase your work, attend events, and connect with tech communities.
+                </p>
 
-        
+                <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                  <button
+                    onClick={() => navigate("/signup")}
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-black text-white rounded-lg font-medium text-base sm:text-lg hover:opacity-90 transition-opacity w-full sm:w-auto"
+                  >
+                    Start Earning
+                  </button>
+                </div>
+              </div>
 
-        {/* Main Content */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col items-center justify-center min-h-screen py-20 sm:py-24 text-center relative z-10 mt-2 sm:mt-4"
-        >
-          <motion.h1
-            variants={itemVariants}
-            className="max-w-4xl mx-auto text-4xl sm:text-6xl lg:text-6xl font-light tracking-tight text-black dark:text-dark-text [text-wrap:balance]"
-            style={{ fontFamily: "Inter, sans-serif" }}
-          >
-            The All-in-One Platform for{" "}
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
-              className="font-normal italic"
-            >
-              Freelancers
-            </motion.span>
-            <span className="font-light">, </span>
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.0, duration: 0.6 }}
-              className="font-normal italic"
-            >
-              Events
-            </motion.span>
-            <span className="font-light">, and </span>
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2, duration: 0.6 }}
-              className="font-normal italic"
-            >
-              Communities
-            </motion.span>
-          </motion.h1>
+              {/* Hero Image - Bottom */}
+              <div className="w-full max-w-5xl mt-8">
+                <div className="relative w-full rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                  <img
+                    src="/images/techcollabhero.webp"
+                    alt="TechCollab Platform"
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+              </div>
 
-          <motion.p
-            variants={itemVariants}
-            className="text-gray-600 dark:text-gray-300 mt-4 sm:mt-6 max-w-2xl mx-auto font-normal text-base sm:text-xl px-1"
-            style={{ fontFamily: "Inter, sans-serif" }}
-          >
-            Showcase your work, find paid gigs, join tech communities
-          </motion.p>
-
-          <motion.div
-            variants={itemVariants}
-            className="mt-8 sm:mt-10 flex flex-col items-center w-full max-w-md mx-auto"
-          >
-            <div className="flex justify-center">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={() => navigate("/signup")}
-                  rightIcon={<ArrowUpRight className="w-5 h-5" />}
-                >
-                  Get Started
-                </Button>
-              </motion.div>
             </div>
-            <motion.p
-              variants={itemVariants}
-              className="text-sm text-gray-500 dark:text-gray-400 mt-3 sm:mt-4 italic"
-            >
-              Join our community today and start collaborating!
-            </motion.p>
-          </motion.div>
-
-          {/* Feature Cards */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl px-4"
-          >
-            {/* Feature cards with motion */}
-            <motion.div
-              variants={itemVariants}
-              whileHover={{ y: -10 }}
-              className="bg-white dark:bg-dark-buttonBg/10 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-green-100 dark:bg-dark-button/20 rounded-2xl flex items-center justify-center mb-6">
-                <Code className="w-8 h-8 text-green-600 dark:text-dark-button" />
-              </div>
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-dark-text mb-3">
-                  Freelance Marketplace
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Find exciting gigs, showcase your portfolio, and connect with clients. 
-                  From web development to UI/UX design, your next opportunity awaits.
-                </p>
-              </div>
-              <div className="aspect-square w-full rounded-xl overflow-hidden bg-gray-50 dark:bg-dark-buttonBg/20">
-                <img
-                  src="https://res.cloudinary.com/dtmo3evjx/image/upload/v1748258394/Freelancer-amico_k9wiqy.png"
-                  alt="Freelance Marketplace"
-                  className="w-full h-full object-contain p-4"
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              variants={itemVariants}
-              whileHover={{ y: -10 }}
-              className="bg-white dark:bg-dark-buttonBg/10 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-green-100 dark:bg-dark-button/20 rounded-2xl flex items-center justify-center mb-6">
-                <Users className="w-8 h-8 text-green-600 dark:text-dark-button" />
-              </div>
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-dark-text mb-3">
-                  Tech Communities
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Join specialized tech communities, engage in real-time discussions, 
-                  and collaborate with fellow developers in your favorite tech stacks.
-                </p>
-              </div>
-              <div className="aspect-square w-full rounded-xl overflow-hidden bg-gray-50 dark:bg-dark-buttonBg/20">
-                <img
-                  src="https://res.cloudinary.com/dtmo3evjx/image/upload/v1748258395/Group_Chat-bro_wott7y.png"
-                  alt="Tech Communities"
-                  className="w-full h-full object-contain p-4"
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              variants={itemVariants}
-              whileHover={{ y: -10 }}
-              className="bg-white dark:bg-dark-buttonBg/10 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-green-100 dark:bg-dark-button/20 rounded-2xl flex items-center justify-center mb-6">
-                <MessageSquare className="w-8 h-8 text-green-600 dark:text-dark-button" />
-              </div>
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-dark-text mb-3">
-                  Live Events & Learning
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Attend virtual hackathons, join interactive workshops, and participate 
-                  in tech conferences. Learn, network, and grow your skills together.
-                </p>
-              </div>
-              <div className="aspect-square w-full rounded-xl overflow-hidden bg-gray-50 dark:bg-dark-buttonBg/20">
-                <img
-                  src="https://res.cloudinary.com/dtmo3evjx/image/upload/v1748258395/Events-bro_f5ly1w.png"
-                  alt="Live Events & Learning"
-                  className="w-full h-full object-contain p-4"
-                />
-              </div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );
